@@ -145,10 +145,17 @@ export const useCustomCursor = (cursorRef: React.RefObject<HTMLDivElement>) => {
       zIndex: 9999
     });
 
+    const checkTarget = setInterval(() => {
+      if (isHovering && currentTarget && !document.body.contains(currentTarget)) {
+        reset();
+      }
+    }, 100);
+
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseover', onMouseOver);
       window.removeEventListener('mouseout', onMouseOut);
+      clearInterval(checkTarget);
     };
   }, [cursorRef]);
 

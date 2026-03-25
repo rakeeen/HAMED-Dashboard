@@ -1,7 +1,8 @@
 import { motion } from "motion/react";
 import { useSiteContext } from "../../context/SiteContext";
+import { Project } from "../../types";
 
-export const ContentSections = () => {
+export const ContentSections = ({ project }: { project?: Project }) => {
   const { siteConfig } = useSiteContext();
   return (
     <section className="bg-surface">
@@ -16,7 +17,7 @@ export const ContentSections = () => {
         <img 
           alt="Architecture Detail" 
           className="w-full h-full object-cover" 
-          src={siteConfig.siteImages?.projectDetail1 || ''}
+          src={project?.detailImages?.[0] || siteConfig.siteImages?.projectDetail1 || ''}
           referrerPolicy="no-referrer"
         />
       </motion.div>
@@ -46,7 +47,7 @@ export const ContentSections = () => {
             <img 
               alt="Interior Detail" 
               className="w-full h-full object-cover" 
-              src={siteConfig.siteImages?.projectDetail2 || ''}
+              src={project?.detailImages?.[1] || siteConfig.siteImages?.projectDetail2 || ''}
               referrerPolicy="no-referrer"
             />
           </div>
@@ -65,7 +66,7 @@ export const ContentSections = () => {
           <img 
             alt="Studio View" 
             className="w-full h-full object-cover" 
-            src={siteConfig.siteImages?.projectDetail3 || ''}
+            src={project?.detailImages?.[2] || siteConfig.siteImages?.projectDetail3 || ''}
             referrerPolicy="no-referrer"
           />
         </motion.div>

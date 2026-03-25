@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { CustomCursor } from './components/ui/CustomCursor';
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
-import { SiteProvider } from './context/SiteContext';
+import { SiteProvider, useSiteContext } from './context/SiteContext';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -24,19 +24,19 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <SiteProvider>
-      <Router basename={import.meta.env.BASE_URL}>
+      <Router>
         <ScrollToTop />
         <Routes>
           <Route path="/login" element={
             <div className="bg-background text-white selection:bg-primary/30 min-h-screen font-sans flex flex-col">
-              <CustomCursor />
+              <DashboardCursorWrapper />
               <Login />
             </div>
           } />
           <Route path="/*" element={
             <RequireAuth>
               <div className="bg-background text-white selection:bg-primary/30 min-h-screen font-sans flex flex-col">
-                <CustomCursor />
+                <DashboardCursorWrapper />
                 <Dashboard />
               </div>
             </RequireAuth>
@@ -46,3 +46,9 @@ export default function App() {
     </SiteProvider>
   );
 }
+
+const DashboardCursorWrapper = () => {
+  const { settings } = useSiteContext();
+  if (!settings.showCursor) return null;
+  return <CustomCursor />;
+};

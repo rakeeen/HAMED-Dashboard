@@ -111,8 +111,8 @@ export const Dashboard = () => {
 
   return (
     <div className={`min-h-screen pt-24 pb-12 px-4 md:px-8 w-full max-w-[1400px] mx-auto flex flex-col md:flex-row gap-8 ${isRTL ? 'font-arabic' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 flex-shrink-0 space-y-2">
+      {/* Sidebar - hidden when printing */}
+      <aside className="w-full md:w-64 flex-shrink-0 space-y-2 print:hidden">
         <div className="mb-8 px-4">
           <h1 className="text-2xl font-black uppercase tracking-tighter">{t.title}</h1>
           <div className="flex gap-2 mt-4">
@@ -162,11 +162,11 @@ export const Dashboard = () => {
           )}
 
           <button 
-            onClick={handleSave}
-            className="bg-white text-on-primary px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-neutral-200 transition-all cursor-pointer z-10"
+            onClick={activeTab === 'clients' ? () => window.print() : handleSave}
+            className="bg-white text-on-primary px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-neutral-200 transition-all cursor-pointer z-10 print:hidden"
           >
             <Save size={14} />
-            {t.save}
+            {activeTab === 'clients' ? 'Export PDF' : t.save}
           </button>
         </div>
 
@@ -396,7 +396,10 @@ export const Dashboard = () => {
                 <input placeholder="Title" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.title || ''} onChange={e => setCurrentProject({...currentProject, title: e.target.value})} />
                 <textarea placeholder="Description" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[120px]" value={currentProject.description || ''} onChange={e => setCurrentProject({...currentProject, description: e.target.value})} />
                 <input placeholder="Category" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.category || ''} onChange={e => setCurrentProject({...currentProject, category: e.target.value})} />
-                <input placeholder="Image URL (e.g. /images/proj.jpg)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.image || ''} onChange={e => setCurrentProject({...currentProject, image: e.target.value})} />
+                <input placeholder="Card Cover Image URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.image || ''} onChange={e => setCurrentProject({...currentProject, image: e.target.value})} />
+                <input placeholder="Detail Preview Image 1 URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.detailImages?.[0] || ''} onChange={e => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} />
+                <input placeholder="Detail Preview Image 2 URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.detailImages?.[1] || ''} onChange={e => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} />
+                <input placeholder="Detail Preview Image 3 URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.detailImages?.[2] || ''} onChange={e => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', currentProject.detailImages?.[1] || '', e.target.value]})} />
                 <input placeholder="Tags (comma separated)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.tags?.join(', ') || ''} onChange={e => setCurrentProject({...currentProject, tags: e.target.value.split(',').map(t=>t.trim())})} />
                 <label className="flex items-center gap-4 cursor-pointer p-5 bg-white/5 rounded-2xl border border-white/10">
                   <input type="checkbox" checked={!!currentProject.featured} onChange={e => setCurrentProject({...currentProject, featured: e.target.checked})} className="w-6 h-6 accent-primary rounded-md" />
