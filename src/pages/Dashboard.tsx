@@ -105,7 +105,6 @@ export const Dashboard = () => {
     { id: 'projects', label: t.nav_projects, icon: FolderKanban },
     { id: 'experience', label: t.nav_experience, icon: Briefcase },
     { id: 'competencies', label: isRTL ? 'المهارات' : 'Competencies', icon: Star },
-    { id: 'clients', label: t.nav_clients, icon: Users },
     { id: 'settings', label: t.nav_settings, icon: Settings },
   ];
 
@@ -162,11 +161,11 @@ export const Dashboard = () => {
           )}
 
           <button 
-            onClick={activeTab === 'clients' ? () => window.print() : handleSave}
+            onClick={handleSave}
             className="bg-white text-on-primary px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-neutral-200 transition-all cursor-pointer z-10 print:hidden"
           >
             <Save size={14} />
-            {activeTab === 'clients' ? 'Export PDF' : t.save}
+            {t.save}
           </button>
         </div>
 
@@ -326,39 +325,6 @@ export const Dashboard = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Clients Tab */}
-          {activeTab === 'clients' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold uppercase tracking-tight mb-8">{t.nav_clients}</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-white/5 text-left rtl:text-right text-[10px] uppercase tracking-widest text-secondary">
-                      <th className="py-4 px-4">{t.client_name}</th>
-                      <th className="py-4 px-4">{t.client_email}</th>
-                      <th className="py-4 px-4">{t.client_message}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                    {inquiries.length > 0 ? inquiries.map(inq => (
-                      <tr key={inq.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
-                        <td className="py-4 px-4 font-medium rounded-l-2xl">{inq.name}</td>
-                        <td className="py-4 px-4 text-secondary">{inq.email}</td>
-                        <td className="py-4 px-4 text-secondary max-w-xs truncate">{inq.message}</td>
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={3} className="py-12 text-center text-secondary opacity-50 italic">
-                          {t.no_inquiries}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
               </div>
             </div>
           )}
