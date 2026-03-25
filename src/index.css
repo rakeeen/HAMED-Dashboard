@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-label: "Space Grotesk", ui-monospace, SFMono-Regular, monospace;
+
+  --color-background: #131313;
+  --color-surface: #131313;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-surface-container-low: #1b1b1b;
+  --color-surface-container: #1f1f1f;
+  --color-surface-container-high: #2a2a2a;
+  --color-surface-container-highest: #353535;
+  --color-surface-bright: #393939;
+  
+  --color-primary: #E8DFD7;
+  --color-white: #E8DFD7;
+  --color-on-primary: #2f3131;
+  --color-secondary: #c7c6c6;
+  --color-outline: #8e9192;
+  --color-outline-variant: #444748;
+  
+  --radius-default: 0.25rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-primary font-sans antialiased selection:bg-white selection:text-black;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(180deg, #E8DFD7 0%, #a3a3a3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .metallic-gradient {
+    background: linear-gradient(180deg, #E8DFD7 0%, #E2E2E2 100%);
+  }
+
+  .glass-panel {
+    @apply bg-surface-container/60 backdrop-blur-xl;
+  }
+}
+
+@media (pointer: fine) {
+  html, body, *, *::before, *::after, a, button, input {
+    cursor: none !important;
+  }
+}
