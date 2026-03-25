@@ -57,7 +57,7 @@ export const PROJECTS: Project[] = [
     tags: ['Startup', 'Product Design', 'Brand Identity'],
     category: 'Education',
     image: 'https://picsum.photos/seed/wiqaa/800/800',
-    featured: false
+    featured: true
   }
 ];
 

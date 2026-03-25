@@ -14,7 +14,7 @@ const ScrollToTop = () => {
 };
 
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
-  const isAuth = localStorage.getItem('hamed_admin_auth') === 'true';
+  const isAuth = localStorage.getItem('hamed_admin_auth') === 'true' || sessionStorage.getItem('hamed_admin_auth') === 'true';
   if (!isAuth) {
     return <Navigate to="/login" replace />;
   }

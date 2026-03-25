@@ -25,6 +25,9 @@ export const Dashboard = () => {
   const [lang, setLang] = useState<DashboardLang>('en');
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
+  const [adminEmail, setAdminEmail] = useState(localStorage.getItem('hamed_admin_email') || 'admin@admin.com');
+  const [adminPass, setAdminPass] = useState(localStorage.getItem('hamed_admin_pass') || 'admin');
+
   // Modals state
   const [isEditingProject, setIsEditingProject] = useState(false);
   const [currentProject, setCurrentProject] = useState<Partial<Project> | null>(null);
@@ -174,88 +177,97 @@ export const Dashboard = () => {
           
           {/* Content Tab */}
           {activeTab === 'content' && (
-            <div className="space-y-8 max-w-2xl">
-              <h2 className="text-xl font-bold uppercase tracking-tight">{isRTL ? 'تعديل بيانات الموقع' : 'Edit Site Content'}</h2>
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">{t.site_name}</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.name} onChange={(e) => updateConfig({ name: e.target.value })} />
+            <div className="space-y-12 max-w-3xl">
+              <div>
+                <h2 className="text-xl font-bold uppercase tracking-tight mb-6">{isRTL ? 'معلومات أساسية' : 'Basic Information'}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">{t.site_name}</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.name} onChange={(e) => updateConfig({ name: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">{t.site_role}</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.role} onChange={(e) => updateConfig({ role: e.target.value })} />
+                  </div>
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">{t.site_summary}</label>
+                    <textarea className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none min-h-[100px]"
+                      value={siteConfig.summary} onChange={(e) => updateConfig({ summary: e.target.value })} />
+                  </div>
+                  <div className="space-y-2 col-span-1 md:col-span-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">Detailed Bio</label>
+                    <textarea className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none min-h-[100px]"
+                      value={siteConfig.detailed_summary} onChange={(e) => updateConfig({ detailed_summary: e.target.value })} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">{t.site_role}</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.role} onChange={(e) => updateConfig({ role: e.target.value })} />
+              </div>
+
+              <div className="pt-8 border-t border-white/10">
+                <h2 className="text-xl font-bold uppercase tracking-tight mb-6">{isRTL ? 'التواصل والروابط' : 'Contact & Socials'}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">Location</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.location} onChange={(e) => updateConfig({ location: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">Email</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.email} onChange={(e) => updateConfig({ email: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">Behance URL</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.socials?.behance || ''} onChange={(e) => updateConfig({ socials: { ...siteConfig.socials, behance: e.target.value }})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">LinkedIn URL</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.socials?.linkedin || ''} onChange={(e) => updateConfig({ socials: { ...siteConfig.socials, linkedin: e.target.value }})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">X (Twitter) URL</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.socials?.x || ''} onChange={(e) => updateConfig({ socials: { ...siteConfig.socials, x: e.target.value }})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase tracking-widest text-secondary">Tools (Comma separated)</label>
+                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                      value={siteConfig.tools?.join(', ') || ''} onChange={(e) => updateConfig({ tools: e.target.value.split(',').map(t=>t.trim()) })} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">Location</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.location} onChange={(e) => updateConfig({ location: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">Email</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.email} onChange={(e) => updateConfig({ email: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">{t.site_summary}</label>
-                  <textarea className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none min-h-[100px]"
-                    value={siteConfig.summary} onChange={(e) => updateConfig({ summary: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">Detailed Bio</label>
-                  <textarea className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none min-h-[100px]"
-                    value={siteConfig.detailed_summary} onChange={(e) => updateConfig({ detailed_summary: e.target.value })} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">Behance URL</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.socials?.behance || ''} onChange={(e) => updateConfig({ socials: { ...siteConfig.socials, behance: e.target.value }})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">LinkedIn URL</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.socials?.linkedin || ''} onChange={(e) => updateConfig({ socials: { ...siteConfig.socials, linkedin: e.target.value }})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">X (Twitter) URL</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.socials?.x || ''} onChange={(e) => updateConfig({ socials: { ...siteConfig.socials, x: e.target.value }})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest text-secondary">Tools (Comma separated)</label>
-                  <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                    value={siteConfig.tools?.join(', ') || ''} onChange={(e) => updateConfig({ tools: e.target.value.split(',').map(t=>t.trim()) })} />
-                </div>
+              </div>
+
+              <div className="pt-8 border-t border-white/10 space-y-4">
+                <h2 className="text-xl font-bold uppercase tracking-tight mb-6">{isRTL ? 'صور الموقع الرئيسية' : 'Global Site Images'}</h2>
                 
-                <div className="space-y-4 pt-6 border-t border-white/10">
-                  <h3 className="font-bold text-lg uppercase tracking-tight text-white/50">{isRTL ? 'صور الموقع (روابط)' : 'Global Images (URLs)'}</h3>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-secondary">About Portrait Image</label>
-                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                      value={siteConfig.siteImages?.aboutPortrait || ''} onChange={(e) => updateConfig({ siteImages: { ...siteConfig.siteImages, aboutPortrait: e.target.value }})} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-secondary">Contact Background Image</label>
-                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                      value={siteConfig.siteImages?.contactBackground || ''} onChange={(e) => updateConfig({ siteImages: { ...siteConfig.siteImages, contactBackground: e.target.value }})} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-secondary">Project Details Canvas 1</label>
-                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                      value={siteConfig.siteImages?.projectDetail1 || ''} onChange={(e) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail1: e.target.value }})} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-secondary">Project Details Canvas 2</label>
-                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                      value={siteConfig.siteImages?.projectDetail2 || ''} onChange={(e) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail2: e.target.value }})} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-secondary">Project Details Canvas 3</label>
-                    <input className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
-                      value={siteConfig.siteImages?.projectDetail3 || ''} onChange={(e) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail3: e.target.value }})} />
-                  </div>
-                </div>
+                <ImageInput 
+                  label="About Portrait Image" 
+                  value={siteConfig.siteImages?.aboutPortrait || ''} 
+                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, aboutPortrait: e.target.value }})} 
+                />
+                <ImageInput 
+                  label="Contact Background Image" 
+                  value={siteConfig.siteImages?.contactBackground || ''} 
+                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, contactBackground: e.target.value }})} 
+                />
+                <ImageInput 
+                  label="Project Details Fallback Canvas 1" 
+                  value={siteConfig.siteImages?.projectDetail1 || ''} 
+                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail1: e.target.value }})} 
+                />
+                <ImageInput 
+                  label="Project Details Fallback Canvas 2" 
+                  value={siteConfig.siteImages?.projectDetail2 || ''} 
+                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail2: e.target.value }})} 
+                />
+                <ImageInput 
+                  label="Project Details Fallback Canvas 3" 
+                  value={siteConfig.siteImages?.projectDetail3 || ''} 
+                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail3: e.target.value }})} 
+                />
               </div>
             </div>
           )}
@@ -334,14 +346,39 @@ export const Dashboard = () => {
             <div className="space-y-8 max-w-2xl">
               <h2 className="text-xl font-bold uppercase tracking-tight">{t.nav_settings}</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between bg-white/5 p-6 rounded-3xl border border-white/5">
+                <div className="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-6">
                   <div className="space-y-1">
-                    <p className="font-bold">{t.toggle_cursor}</p>
-                    <p className="text-xs text-secondary opacity-60">Enable the high-performance lerp cursor</p>
+                    <h3 className="font-bold">Dashboard Security</h3>
+                    <p className="text-xs text-secondary opacity-60">Update the credentials required to access this dashboard.</p>
                   </div>
-                  <button onClick={() => updateSettings({ showCursor: !settings.showCursor })} className={`w-14 h-8 rounded-full transition-all relative ${settings.showCursor ? 'bg-primary' : 'bg-white/10'}`}>
-                    <div className={`absolute top-1.5 w-5 h-5 rounded-full bg-white transition-all ${settings.showCursor ? 'right-1.5' : 'left-1.5'}`} />
-                  </button>
+                  
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-secondary">Dashboard Login Email</label>
+                      <input 
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                        type="email"
+                        value={adminEmail} 
+                        onChange={(e) => {
+                          setAdminEmail(e.target.value);
+                          localStorage.setItem('hamed_admin_email', e.target.value);
+                        }} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-secondary">Dashboard Password</label>
+                      <input 
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none"
+                        type="text"
+                        value={adminPass} 
+                        onChange={(e) => {
+                          setAdminPass(e.target.value);
+                          localStorage.setItem('hamed_admin_pass', e.target.value);
+                        }} 
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-secondary mt-2 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Changes to credentials save automatically to this device.</p>
                 </div>
               </div>
             </div>
@@ -362,10 +399,14 @@ export const Dashboard = () => {
                 <input placeholder="Title" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.title || ''} onChange={e => setCurrentProject({...currentProject, title: e.target.value})} />
                 <textarea placeholder="Description" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[120px]" value={currentProject.description || ''} onChange={e => setCurrentProject({...currentProject, description: e.target.value})} />
                 <input placeholder="Category" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.category || ''} onChange={e => setCurrentProject({...currentProject, category: e.target.value})} />
-                <input placeholder="Card Cover Image URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.image || ''} onChange={e => setCurrentProject({...currentProject, image: e.target.value})} />
-                <input placeholder="Detail Preview Image 1 URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.detailImages?.[0] || ''} onChange={e => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} />
-                <input placeholder="Detail Preview Image 2 URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.detailImages?.[1] || ''} onChange={e => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} />
-                <input placeholder="Detail Preview Image 3 URL" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.detailImages?.[2] || ''} onChange={e => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', currentProject.detailImages?.[1] || '', e.target.value]})} />
+                
+                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Project Images</h4>
+                <ImageInput placeholder="Card Cover Image URL" value={currentProject.image || ''} onChange={(e: any) => setCurrentProject({...currentProject, image: e.target.value})} />
+                <ImageInput placeholder="Detail Preview Image 1 URL" value={currentProject.detailImages?.[0] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} />
+                <ImageInput placeholder="Detail Preview Image 2 URL" value={currentProject.detailImages?.[1] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} />
+                <ImageInput placeholder="Detail Preview Image 3 URL" value={currentProject.detailImages?.[2] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', currentProject.detailImages?.[1] || '', e.target.value]})} />
+                
+                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Publishing</h4>
                 <input placeholder="Tags (comma separated)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.tags?.join(', ') || ''} onChange={e => setCurrentProject({...currentProject, tags: e.target.value.split(',').map(t=>t.trim())})} />
                 <label className="flex items-center gap-4 cursor-pointer p-5 bg-white/5 rounded-2xl border border-white/10">
                   <input type="checkbox" checked={!!currentProject.featured} onChange={e => setCurrentProject({...currentProject, featured: e.target.checked})} className="w-6 h-6 accent-primary rounded-md" />
@@ -418,3 +459,18 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+const ImageInput = ({ label, value, onChange, placeholder }: any) => (
+  <div className="space-y-2">
+    {label && <label className="text-[10px] uppercase tracking-widest text-secondary">{label}</label>}
+    <div className="flex items-center gap-3">
+      {value ? (
+         <img src={value} alt="Preview" className="w-12 h-12 rounded-full object-cover border border-white/20 flex-shrink-0 bg-white/5 shadow-inner" onError={(e) => (e.currentTarget.style.display = 'none')} onLoad={(e) => (e.currentTarget.style.display = 'block')} />
+      ) : (
+         <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex-shrink-0" />
+      )}
+      <input className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none w-full min-w-0"
+        placeholder={placeholder || 'Image URL'} value={value} onChange={onChange} />
+    </div>
+  </div>
+);

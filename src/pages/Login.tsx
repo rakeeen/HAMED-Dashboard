@@ -5,6 +5,7 @@ import { Lock } from 'lucide-react';
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -16,7 +17,11 @@ export const Login = () => {
     const adminPass = localStorage.getItem('hamed_admin_pass') || 'admin';
 
     if (email === adminEmail && password === adminPass) {
-      localStorage.setItem('hamed_admin_auth', 'true');
+      if (rememberMe) {
+        localStorage.setItem('hamed_admin_auth', 'true');
+      } else {
+        sessionStorage.setItem('hamed_admin_auth', 'true');
+      }
       navigate('/');
     } else {
       setError('Invalid email or password');
@@ -72,6 +77,16 @@ export const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer mt-4">
+            <input 
+              type="checkbox" 
+              checked={rememberMe} 
+              onChange={(e) => setRememberMe(e.target.checked)} 
+              className="w-5 h-5 accent-primary rounded bg-white/10 border-white/20" 
+            />
+            <span className="text-sm text-secondary font-medium">Remember me for future visits</span>
+          </label>
 
           <button 
             type="submit" 
