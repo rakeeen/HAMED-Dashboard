@@ -109,9 +109,14 @@ export const Dashboard = () => {
   };
 
   const deleteProject = (id: string) => {
-    if (window.confirm('Delete this project?')) {
-      updateProjects(projects.filter(p => p.id !== id));
-    }
+    setConfirmDialog({
+      title: "Delete Project",
+      desc: "Are you sure you want to delete this project? This cannot be undone.",
+      onConfirm: () => {
+        updateProjects(projects.filter(p => p.id !== id));
+        setConfirmDialog(null);
+      }
+    });
   };
 
   const saveTimeline = () => {
@@ -128,9 +133,14 @@ export const Dashboard = () => {
   };
 
   const deleteTimeline = (item: TimelineItem) => {
-    if (window.confirm('Delete this experience?')) {
-      updateTimeline(timeline.filter(t => t.role !== item.role || t.company !== item.company));
-    }
+    setConfirmDialog({
+      title: "Delete Experience",
+      desc: "Are you sure you want to delete this experience entry?",
+      onConfirm: () => {
+        updateTimeline(timeline.filter(t => t.role !== item.role || t.company !== item.company));
+        setConfirmDialog(null);
+      }
+    });
   };
 
   const saveCompetency = () => {
@@ -147,9 +157,14 @@ export const Dashboard = () => {
   };
 
   const deleteCompetency = (title: string) => {
-    if (window.confirm('Delete this competency?')) {
-      updateCompetencies(competencies.filter(c => c.title !== title));
-    }
+    setConfirmDialog({
+      title: "Delete Competency",
+      desc: "Are you sure you want to delete this competency?",
+      onConfirm: () => {
+        updateCompetencies(competencies.filter(c => c.title !== title));
+        setConfirmDialog(null);
+      }
+    });
   };
 
   const tabs: { id: DashboardTab; label: string; icon: any; badge?: number }[] = [

@@ -125,9 +125,16 @@ export const useCustomCursor = (cursorRef: React.RefObject<HTMLDivElement>) => {
       }
     };
 
+    const onClick = () => {
+      setTimeout(() => {
+         reset();
+      }, 50);
+    };
+
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseover', onMouseOver);
     window.addEventListener('mouseout', onMouseOut);
+    window.addEventListener('click', onClick);
 
     // Initial state setup
     gsap.set(cursorRef.current, { 
@@ -155,6 +162,7 @@ export const useCustomCursor = (cursorRef: React.RefObject<HTMLDivElement>) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseover', onMouseOver);
       window.removeEventListener('mouseout', onMouseOut);
+      window.removeEventListener('click', onClick);
       clearInterval(checkTarget);
     };
   }, [cursorRef]);
