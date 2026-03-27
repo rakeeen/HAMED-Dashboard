@@ -57,23 +57,24 @@ export const Dashboard = () => {
   const t = DASHBOARD_I18N[lang];
   const isRTL = lang === 'ar';
 
-  const handleSave = () => {
-    setSaveStatus('Saving...');
-    setDoc(doc(db, 'content', 'main'), {
-      siteConfig,
-      projects,
-      timeline,
-      competencies,
-      settings
-    }).catch(e => {
-      console.error("Firebase save error", e);
-      alert("❌ فشل الحفظ السحابي!\nقاعدة البيانات الخاصة بك قد تكون انتهت صلاحيتها Test Mode، أو لا تمتلك الصلاحيات. \n\nيرجى فتح إعدادات (Rules) في Firestore وتغييرها لتسمح بالكتابة.\n\nالخطأ الفني: " + e.message);
-    });
-    
-    setTimeout(() => {
+  const handleSave = async () => {
+    try {
+      setSaveStatus('Saving to Cloud...');
+      await setDoc(doc(db, 'content', 'main'), {
+        siteConfig,
+        projects,
+        timeline,
+        competencies,
+        settings
+      });
       setSaveStatus('Changes Saved!');
-      setTimeout(() => setSaveStatus(null), 2000);
-    }, 400);
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (e: any) {
+      console.error("Firebase save error", e);
+      alert("❌ فشل الحفظ في السحابة!\nفايربيز يرفض تعديلك لأنك لم تقم بتفعيل صلاحيات القراءة والكتابة في قاعدة البيانات.\n\nمن فضلك اذهب إلى:\nFirebase Console > Firestore Database > Rules\nوغيّر السطر إلى:\nallow read, write: if true;\n\nالخطأ الفني: " + e.message);
+      setSaveStatus('Failed to Save');
+      setTimeout(() => setSaveStatus(null), 3000);
+    }
   };
 
   const saveProject = () => {
