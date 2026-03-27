@@ -7,6 +7,16 @@ export interface Project {
   detailImages?: string[];
   category: string;
   featured?: boolean;
+  link?: string;
+  github?: string;
+  content?: string;
+  client?: string;
+  role?: string;
+  duration?: string;
+  challenge?: string;
+  solution?: string;
+  architecture?: string;
+  strategy?: string;
 }
 
 export interface TimelineItem {

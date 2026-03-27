@@ -479,7 +479,20 @@ export const Dashboard = () => {
                 
                 <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Publishing</h4>
                 <input placeholder="Tags (comma separated)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.tags?.join(', ') || ''} onChange={e => setCurrentProject({...currentProject, tags: e.target.value.split(',').map(t=>t.trim())})} />
-                <label className="flex items-center gap-4 cursor-pointer p-5 bg-white/5 rounded-2xl border border-white/10">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input placeholder="Client (e.g. Meta)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.client || ''} onChange={e => setCurrentProject({...currentProject, client: e.target.value})} />
+                  <input placeholder="Role (e.g. Lead Designer)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentProject.role || ''} onChange={e => setCurrentProject({...currentProject, role: e.target.value})} />
+                  <input placeholder="Duration (e.g. 6 Months)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none md:col-span-2" value={currentProject.duration || ''} onChange={e => setCurrentProject({...currentProject, duration: e.target.value})} />
+                </div>
+
+                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Deep Structure</h4>
+                <textarea placeholder="Strategy & Approach" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.strategy || ''} onChange={e => setCurrentProject({...currentProject, strategy: e.target.value})} />
+                <textarea placeholder="The Challenge" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.challenge || ''} onChange={e => setCurrentProject({...currentProject, challenge: e.target.value})} />
+                <textarea placeholder="The Solution" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.solution || ''} onChange={e => setCurrentProject({...currentProject, solution: e.target.value})} />
+                <textarea placeholder="Architecture Highlights" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.architecture || ''} onChange={e => setCurrentProject({...currentProject, architecture: e.target.value})} />
+
+                <label className="flex items-center gap-4 cursor-pointer p-5 bg-white/5 rounded-2xl border border-white/10 mt-4">
                   <input type="checkbox" checked={!!currentProject.featured} onChange={e => setCurrentProject({...currentProject, featured: e.target.checked})} className="w-6 h-6 accent-primary rounded-md" />
                   <span className="font-medium">Featured Project</span>
                 </label>
@@ -554,30 +567,34 @@ export const Dashboard = () => {
 const ImageInput = ({ label, value, onChange, placeholder }: any) => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const storageRef = ref(storage, `images/${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        console.error("Upload failed", error);
-        setUploadProgress(null);
-        alert("Upload failed. Make sure Firebase Storage is enabled.");
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        onChange({ target: { value: downloadURL } });
-        setUploadProgress(null);
+    setUploadProgress(25);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'Hamed Wab');
+    setUploadProgress(50);
+    
+    try {
+      const res = await fetch('https://api.cloudinary.com/v1_1/dkw7eqxd2/image/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if(data.secure_url) {
+        setUploadProgress(100);
+        onChange({ target: { value: data.secure_url } });
+        setTimeout(() => setUploadProgress(null), 500);
+      } else {
+        throw new Error(data.error?.message || "Upload failed");
       }
-    );
+    } catch(err: any) {
+      console.error(err);
+      alert("Cloudinary Upload Failed: " + err.message);
+      setUploadProgress(null);
+    }
   };
 
   return (
