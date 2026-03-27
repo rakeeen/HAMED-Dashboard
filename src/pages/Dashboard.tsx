@@ -3,12 +3,12 @@ import { useSiteContext } from '../context/SiteContext';
 import { DASHBOARD_I18N } from '../dashboard_i18n';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Settings, Users, FolderKanban, FileText, 
+  Settings, Users, FolderKanban, FileText, Download, Trash, AlertTriangle,
   Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
 import { db, storage } from '../firebase';
-import { doc, setDoc, collection, query, orderBy, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, orderBy, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 type DashboardTab = 'content' | 'projects' | 'experience' | 'competencies' | 'clients' | 'settings';
