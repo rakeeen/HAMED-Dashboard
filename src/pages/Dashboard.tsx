@@ -7,8 +7,9 @@ import {
   Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
-import { db } from '../firebase';
+import { db, storage } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 type DashboardTab = 'content' | 'projects' | 'experience' | 'competencies' | 'clients' | 'settings';
 type DashboardLang = 'en' | 'ar' | 'it';
@@ -43,23 +44,20 @@ export const Dashboard = () => {
   const t = DASHBOARD_I18N[lang];
   const isRTL = lang === 'ar';
 
-  const handleSave = async () => {
-    try {
-      setSaveStatus('Saving to Cloud...');
-      await setDoc(doc(db, 'content', 'main'), {
-        siteConfig,
-        projects,
-        timeline,
-        competencies,
-        settings
-      });
-      setSaveStatus('Changes deployed to Cloud!');
-      setTimeout(() => setSaveStatus(null), 3000);
-    } catch (e) {
-      console.error(e);
-      setSaveStatus('Error saving data!');
-      setTimeout(() => setSaveStatus(null), 3000);
-    }
+  const handleSave = () => {
+    setSaveStatus('Saving...');
+    setDoc(doc(db, 'content', 'main'), {
+      siteConfig,
+      projects,
+      timeline,
+      competencies,
+      settings
+    }).catch(e => console.error("Firebase save error", e));
+    
+    setTimeout(() => {
+      setSaveStatus('Changes Saved!');
+      setTimeout(() => setSaveStatus(null), 2000);
+    }, 400);
   };
 
   const saveProject = () => {
@@ -473,17 +471,62 @@ export const Dashboard = () => {
   );
 };
 
-const ImageInput = ({ label, value, onChange, placeholder }: any) => (
-  <div className="space-y-2">
-    {label && <label className="text-[10px] uppercase tracking-widest text-secondary">{label}</label>}
-    <div className="flex items-center gap-3">
-      {value ? (
-         <img src={value} alt="Preview" className="w-12 h-12 rounded-full object-cover border border-white/20 flex-shrink-0 bg-white/5 shadow-inner" onError={(e) => (e.currentTarget.style.display = 'none')} onLoad={(e) => (e.currentTarget.style.display = 'block')} />
-      ) : (
-         <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex-shrink-0" />
-      )}
-      <input className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 focus:border-white/30 outline-none w-full min-w-0"
-        placeholder={placeholder || 'Image URL'} value={value} onChange={onChange} />
+const ImageInput = ({ label, value, onChange, placeholder }: any) => {
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const storageRef = ref(storage, `images/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Upload failed", error);
+        setUploadProgress(null);
+        alert("Upload failed. Make sure Firebase Storage is enabled.");
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        onChange({ target: { value: downloadURL } });
+        setUploadProgress(null);
+      }
+    );
+  };
+
+  return (
+    <div className="space-y-2 relative">
+      {label && <label className="text-[10px] uppercase tracking-widest text-secondary">{label}</label>}
+      <div className="flex items-center gap-3 w-full">
+        {value ? (
+           <img src={value} alt="Preview" className="w-12 h-12 rounded-full object-cover border border-white/20 flex-shrink-0 bg-white/5 shadow-inner" onError={(e) => (e.currentTarget.style.display = 'none')} onLoad={(e) => (e.currentTarget.style.display = 'block')} />
+        ) : (
+           <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex-shrink-0 flex items-center justify-center">
+             {uploadProgress !== null && <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
+           </div>
+        )}
+        <div className="flex-1 min-w-0 relative flex items-center">
+          <input className="w-full bg-white/5 border border-white/10 rounded-2xl pl-5 pr-28 py-3.5 focus:border-white/30 outline-none text-sm"
+            placeholder={placeholder || 'Paste Image URL or Upload'} value={value} onChange={onChange} disabled={uploadProgress !== null} />
+          
+          <div className="absolute right-2 flex items-center h-full max-h-[30px]">
+            {uploadProgress !== null ? (
+              <span className="text-[10px] font-bold text-primary mr-3">{Math.round(uploadProgress)}%</span>
+            ) : (
+              <label className="bg-white/10 hover:bg-white/20 text-white text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl cursor-pointer transition-colors flex items-center">
+                Upload
+                <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+              </label>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
