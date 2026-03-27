@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
 import { db, storage } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, orderBy, onSnapshot, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 type DashboardTab = 'content' | 'projects' | 'experience' | 'competencies' | 'clients' | 'settings';
@@ -20,7 +20,6 @@ export const Dashboard = () => {
     projects, updateProjects, 
     timeline, updateTimeline,
     competencies, updateCompetencies,
-    inquiries, markInquiryRead,
     settings, updateSettings 
   } = useSiteContext();
   
@@ -41,6 +40,20 @@ export const Dashboard = () => {
   const [isEditingCompetency, setIsEditingCompetency] = useState(false);
   const [currentCompetency, setCurrentCompetency] = useState<Partial<Competency> | null>(null);
 
+  const [inquiries, setInquiries] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState({ visitors: 0, inquiries: 0 });
+  const [currentInquiry, setCurrentInquiry] = useState<any>(null);
+
+  React.useEffect(() => {
+    const unsubInq = onSnapshot(query(collection(db, 'inquiries'), orderBy('createdAt', 'desc')), (snap) => {
+      setInquiries(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    const unsubAna = onSnapshot(doc(db, 'analytics', 'main'), (snap) => {
+      if(snap.exists()) setAnalytics(snap.data() as any);
+    });
+    return () => { unsubInq(); unsubAna(); };
+  }, []);
+
   const t = DASHBOARD_I18N[lang];
   const isRTL = lang === 'ar';
 
@@ -52,7 +65,10 @@ export const Dashboard = () => {
       timeline,
       competencies,
       settings
-    }).catch(e => console.error("Firebase save error", e));
+    }).catch(e => {
+      console.error("Firebase save error", e);
+      alert("❌ فشل الحفظ السحابي!\nقاعدة البيانات الخاصة بك قد تكون انتهت صلاحيتها Test Mode، أو لا تمتلك الصلاحيات. \n\nيرجى فتح إعدادات (Rules) في Firestore وتغييرها لتسمح بالكتابة.\n\nالخطأ الفني: " + e.message);
+    });
     
     setTimeout(() => {
       setSaveStatus('Changes Saved!');
@@ -114,9 +130,10 @@ export const Dashboard = () => {
     }
   };
 
-  const tabs: { id: DashboardTab; label: string; icon: any }[] = [
+  const tabs: { id: DashboardTab; label: string; icon: any; badge?: number }[] = [
     { id: 'content', label: isRTL ? 'المحتوى' : 'Site Content', icon: FileText },
     { id: 'projects', label: t.nav_projects, icon: FolderKanban },
+    { id: 'clients', label: isRTL ? 'العملاء والتحليلات' : 'Clients & Analytics', icon: Users, badge: inquiries.filter(i => !i.read).length },
     { id: 'experience', label: t.nav_experience, icon: Briefcase },
     { id: 'competencies', label: isRTL ? 'المهارات' : 'Competencies', icon: Star },
     { id: 'settings', label: t.nav_settings, icon: Settings },
@@ -145,12 +162,17 @@ export const Dashboard = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-full transition-all ${
+            className={`w-full flex items-center justify-between px-5 py-3.5 rounded-full transition-all ${
               activeTab === tab.id ? 'bg-white/10 text-white' : 'text-secondary hover:bg-white/5 hover:text-white'
             }`}
           >
-            <tab.icon size={18} />
-            <span className="font-medium">{tab.label}</span>
+            <div className="flex items-center gap-3">
+              <tab.icon size={18} />
+              <span className="font-medium">{tab.label}</span>
+            </div>
+            {tab.badge ? (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{tab.badge}</span>
+            ) : null}
           </button>
         ))}
       </aside>
@@ -264,21 +286,58 @@ export const Dashboard = () => {
                   value={siteConfig.siteImages?.contactBackground || ''} 
                   onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, contactBackground: e.target.value }})} 
                 />
-                <ImageInput 
-                  label="Project Details Fallback Canvas 1" 
-                  value={siteConfig.siteImages?.projectDetail1 || ''} 
-                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail1: e.target.value }})} 
-                />
-                <ImageInput 
-                  label="Project Details Fallback Canvas 2" 
-                  value={siteConfig.siteImages?.projectDetail2 || ''} 
-                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail2: e.target.value }})} 
-                />
-                <ImageInput 
-                  label="Project Details Fallback Canvas 3" 
-                  value={siteConfig.siteImages?.projectDetail3 || ''} 
-                  onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, projectDetail3: e.target.value }})} 
-                />
+              </div>
+            </div>
+          )}
+
+          {/* Clients Tab */}
+          {activeTab === 'clients' && (
+            <div className="space-y-8">
+              <h2 className="text-xl font-bold uppercase tracking-tight">{isRTL ? 'العملاء والتحليلات' : 'Clients & Analytics'}</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white/5 p-6 rounded-3xl border border-white/5 flex flex-col justify-center relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/20 transition-all" />
+                  <span className="text-sm text-secondary uppercase tracking-widest mb-2 z-10">Total Visitors</span>
+                  <span className="text-5xl font-black z-10">{analytics?.visitors || 0}</span>
+                </div>
+                <div className="bg-white/5 p-6 rounded-3xl border border-white/5 flex flex-col justify-center relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-500/20 transition-all" />
+                  <span className="text-sm text-secondary uppercase tracking-widest mb-2 z-10">Total Inquiries</span>
+                  <span className="text-5xl font-black z-10">{analytics?.inquiries || 0}</span>
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-white/5 bg-white/5 overflow-hidden">
+                <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                  <h3 className="font-bold uppercase tracking-widest text-sm text-white/70">Recent Inquiries</h3>
+                </div>
+                <div className="divide-y divide-white/5 max-h-[500px] overflow-y-auto">
+                  {inquiries.map(inq => (
+                    <div 
+                      key={inq.id} 
+                      onClick={() => {
+                         setCurrentInquiry(inq);
+                         if(!inq.read) updateDoc(doc(db, 'inquiries', inq.id), { read: true }).catch(console.error);
+                      }}
+                      className="p-5 flex items-center justify-between hover:bg-white/5 cursor-pointer transition-colors"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className={`font-bold ${!inq.read ? 'text-white' : 'text-secondary'}`}>{inq.name}</h4>
+                          {!inq.read && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />}
+                        </div>
+                        <p className="text-xs text-secondary mt-1">{inq.email}</p>
+                      </div>
+                      <div className="text-xs text-secondary font-mono">
+                        {inq.createdAt ? new Date(inq.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                      </div>
+                    </div>
+                  ))}
+                  {inquiries.length === 0 && (
+                    <div className="p-10 text-center text-secondary text-sm">No inquiries yet.</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -462,6 +521,26 @@ export const Dashboard = () => {
                 <textarea placeholder="Description" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[120px]" value={currentCompetency.description || ''} onChange={e => setCurrentCompetency({...currentCompetency, description: e.target.value})} />
                 <input placeholder="Icon Name (Material Symbols)" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none" value={currentCompetency.icon || ''} onChange={e => setCurrentCompetency({...currentCompetency, icon: e.target.value})} />
                 <button onClick={saveCompetency} className="w-full bg-white text-black py-4 rounded-full font-bold uppercase tracking-wider mt-6 cursor-pointer hover:bg-neutral-200">Save Competency</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {currentInquiry && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface-container w-full max-w-xl rounded-3xl p-8 border border-white/10 max-h-[90vh] overflow-y-auto min-w-0">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold">{currentInquiry.name}</h3>
+                  <a href={`mailto:${currentInquiry.email}`} className="text-sm font-mono text-primary hover:underline">{currentInquiry.email}</a>
+                </div>
+                <button onClick={() => setCurrentInquiry(null)} className="p-2 cursor-pointer bg-white/10 rounded-full hover:bg-white/20"><X size={16} /></button>
+              </div>
+              <div className="bg-white/5 rounded-2xl p-6 text-sm text-secondary whitespace-pre-wrap leading-relaxed border border-white/5 font-sans">
+                {currentInquiry.message}
+              </div>
+              <div className="mt-8 text-xs font-mono text-white/30 text-right">
+                Received: {currentInquiry.createdAt ? new Date(currentInquiry.createdAt.seconds * 1000).toLocaleString() : 'Just now'}
               </div>
             </motion.div>
           </div>
