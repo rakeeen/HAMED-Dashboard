@@ -44,6 +44,9 @@ export const Dashboard = () => {
   const [analytics, setAnalytics] = useState({ visitors: 0, inquiries: 0 });
   const [currentInquiry, setCurrentInquiry] = useState<any>(null);
 
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; desc: string; onConfirm: () => void } | null>(null);
+
   React.useEffect(() => {
     const unsubInq = onSnapshot(query(collection(db, 'inquiries'), orderBy('createdAt', 'desc')), (snap) => {
       setInquiries(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -71,10 +74,28 @@ export const Dashboard = () => {
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (e: any) {
       console.error("Firebase save error", e);
-      alert("❌ فشل الحفظ في السحابة!\nفايربيز يرفض تعديلك لأنك لم تقم بتفعيل صلاحيات القراءة والكتابة في قاعدة البيانات.\n\nمن فضلك اذهب إلى:\nFirebase Console > Firestore Database > Rules\nوغيّر السطر إلى:\nallow read, write: if true;\n\nالخطأ الفني: " + e.message);
+      setAlertMessage("❌ فشل الحفظ في السحابة!\nفايربيز يرفض تعديلك لأنك لم تقم بتفعيل صلاحيات القراءة والكتابة في قاعدة البيانات.\n\nمن فضلك اذهب إلى:\nFirebase Console > Firestore Database > Rules\nوغيّر السطر إلى:\nallow read, write: if true;\n\nالخطأ الفني: " + e.message);
       setSaveStatus('Failed to Save');
       setTimeout(() => setSaveStatus(null), 3000);
     }
+  };
+
+  const clearInquiries = async () => {
+    setConfirmDialog({
+      title: "Clear Inbox",
+      desc: "Are you absolutely sure you want to permanently delete all client messages? This action cannot be undone.",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          // Fire and forget batch drops to clear list quickly
+          inquiries.forEach(inq => {
+            deleteDoc(doc(db, 'inquiries', inq.id)).catch(console.error);
+          });
+        } catch(e: any) {
+          setAlertMessage(e.message);
+        }
+      }
+    });
   };
 
   const saveProject = () => {
@@ -559,6 +580,45 @@ export const Dashboard = () => {
             </motion.div>
           </div>
         )}
+
+        {/* Global Alert Modal */}
+        {alertMessage && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface-container w-full max-w-lg rounded-3xl p-8 border border-red-500/30 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)] border border-red-500/30">
+                <AlertTriangle size={24} />
+              </div>
+              <h3 className="text-2xl font-bold text-red-400 mb-4">System Notice</h3>
+              <div className="bg-red-500/10 rounded-2xl p-5 text-sm text-red-200/80 whitespace-pre-wrap leading-relaxed border border-red-500/20 font-sans text-left mb-8 max-h-64 overflow-y-auto">
+                {alertMessage}
+              </div>
+              <button onClick={() => setAlertMessage(null)} className="w-full bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-full font-bold uppercase tracking-wider cursor-pointer hover:bg-red-500/30 active:scale-95 transition-all">
+                Acknowledge Error
+              </button>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Global Confirm Modal */}
+        {confirmDialog && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-surface-container w-full max-w-sm rounded-3xl p-8 border border-white/10 text-center">
+              <h3 className="text-2xl font-bold mb-4">{confirmDialog.title}</h3>
+              <p className="text-secondary text-sm leading-relaxed font-sans mb-8">
+                {confirmDialog.desc}
+              </p>
+              <div className="flex flex-col gap-3">
+                <button onClick={confirmDialog.onConfirm} className="w-full bg-red-500 text-white py-4 rounded-full font-bold uppercase tracking-wider cursor-pointer hover:bg-red-600 active:scale-95 transition-all">
+                   Proceed & Delete
+                </button>
+                <button onClick={() => setConfirmDialog(null)} className="w-full bg-white/5 text-white py-4 rounded-full font-bold uppercase tracking-wider cursor-pointer hover:bg-white/10 active:scale-95 transition-all">
+                   Cancel Action
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );
@@ -571,11 +631,18 @@ const ImageInput = ({ label, value, onChange, placeholder }: any) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadProgress(25);
+    setUploadProgress(0);
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if(prev === null) return 0;
+        const next = prev + Math.random() * 8 + 2;
+        return next > 95 ? 95 : next;
+      });
+    }, 150);
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'Hamed Wab');
-    setUploadProgress(50);
     
     try {
       const res = await fetch('https://api.cloudinary.com/v1_1/dkw7eqxd2/image/upload', {
@@ -583,14 +650,17 @@ const ImageInput = ({ label, value, onChange, placeholder }: any) => {
         body: formData
       });
       const data = await res.json();
+      clearInterval(progressInterval);
+
       if(data.secure_url) {
         setUploadProgress(100);
         onChange({ target: { value: data.secure_url } });
-        setTimeout(() => setUploadProgress(null), 500);
+        setTimeout(() => setUploadProgress(null), 800);
       } else {
         throw new Error(data.error?.message || "Upload failed");
       }
     } catch(err: any) {
+      clearInterval(progressInterval);
       console.error(err);
       alert("Cloudinary Upload Failed: " + err.message);
       setUploadProgress(null);
