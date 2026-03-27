@@ -7,6 +7,8 @@ import {
   Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
+import { db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 type DashboardTab = 'content' | 'projects' | 'experience' | 'competencies' | 'clients' | 'settings';
 type DashboardLang = 'en' | 'ar' | 'it';
@@ -41,12 +43,23 @@ export const Dashboard = () => {
   const t = DASHBOARD_I18N[lang];
   const isRTL = lang === 'ar';
 
-  const handleSave = () => {
-    setSaveStatus('Saving...');
-    setTimeout(() => {
-      setSaveStatus('Changes Saved!');
-      setTimeout(() => setSaveStatus(null), 2000);
-    }, 500);
+  const handleSave = async () => {
+    try {
+      setSaveStatus('Saving to Cloud...');
+      await setDoc(doc(db, 'content', 'main'), {
+        siteConfig,
+        projects,
+        timeline,
+        competencies,
+        settings
+      });
+      setSaveStatus('Changes deployed to Cloud!');
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (e) {
+      console.error(e);
+      setSaveStatus('Error saving data!');
+      setTimeout(() => setSaveStatus(null), 3000);
+    }
   };
 
   const saveProject = () => {

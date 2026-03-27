@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { SITE_CONFIG as DEFAULT_CONFIG, PROJECTS as DEFAULT_PROJECTS, TIMELINE as DEFAULT_TIMELINE, COMPETENCIES as DEFAULT_COMPETENCIES } from '../constants';
 import { Project, TimelineItem, Competency } from '../types';
+import { db } from '../firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 interface Inquiry {
   id: string;
@@ -42,46 +44,32 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [settings, setSettings] = useState<UISettings>({ showCursor: true, theme: 'dark' });
 
-  // Load from localStorage on mount and sync across tabs
   useEffect(() => {
-    const loadData = () => {
-      const saved = localStorage.getItem('site_data');
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          if (data.siteConfig) setSiteConfig(data.siteConfig);
-          if (data.projects) setProjects(data.projects);
-          if (data.timeline) setTimeline(data.timeline);
-          if (data.competencies) setCompetencies(data.competencies);
-          if (data.inquiries) setInquiries(data.inquiries);
-          if (data.settings) setSettings(data.settings);
-        } catch (e) { console.error(e); }
+    const docRef = doc(db, 'content', 'main');
+    
+    // Subscribe to Firestore changes
+    const unsub = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.siteConfig) setSiteConfig(data.siteConfig);
+        if (data.projects) setProjects(data.projects);
+        if (data.timeline) setTimeline(data.timeline);
+        if (data.competencies) setCompetencies(data.competencies);
+        if (data.settings) setSettings(data.settings);
+      } else {
+        const initialData = {
+          siteConfig: DEFAULT_CONFIG,
+          projects: DEFAULT_PROJECTS,
+          timeline: DEFAULT_TIMELINE,
+          competencies: DEFAULT_COMPETENCIES,
+          settings: { showCursor: true, theme: 'dark' }
+        };
+        setDoc(docRef, initialData);
       }
-    };
+    });
 
-    loadData();
-
-    // Listen for cross-tab changes
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'site_data') {
-        loadData();
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    return () => unsub();
   }, []);
-
-  // Save to localStorage on change
-  useEffect(() => {
-    localStorage.setItem('site_data', JSON.stringify({
-      siteConfig,
-      projects,
-      timeline,
-      competencies,
-      inquiries,
-      settings
-    }));
-  }, [siteConfig, projects, timeline, competencies, inquiries, settings]);
 
   const updateConfig = (config: Partial<typeof DEFAULT_CONFIG>) => setSiteConfig(prev => ({ ...prev, ...config }));
   const updateProjects = (newProjects: Project[]) => setProjects(newProjects);
