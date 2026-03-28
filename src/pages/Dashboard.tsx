@@ -580,10 +580,68 @@ export const Dashboard = () => {
                 <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Deep Structure</h4>
                 <textarea placeholder="Strategy & Approach" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.strategy || ''} onChange={e => setCurrentProject({...currentProject, strategy: e.target.value})} />
                 <textarea placeholder="The Challenge" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.challenge || ''} onChange={e => setCurrentProject({...currentProject, challenge: e.target.value})} />
+                <textarea placeholder="Pain Points" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.painPoints || ''} onChange={e => setCurrentProject({...currentProject, painPoints: e.target.value})} />
                 <textarea placeholder="The Solution" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.solution || ''} onChange={e => setCurrentProject({...currentProject, solution: e.target.value})} />
                 <textarea placeholder="Architecture Highlights" className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 outline-none min-h-[80px]" value={currentProject.architecture || ''} onChange={e => setCurrentProject({...currentProject, architecture: e.target.value})} />
 
-                <label className="flex items-center gap-4 cursor-pointer p-5 bg-white/5 rounded-2xl border border-white/10 mt-4">
+                <h4 className="pt-8 pb-4 font-bold text-sm uppercase tracking-widest text-white border-t border-white/10">Dynamic Sections (Dribbble Model)</h4>
+                <div className="space-y-4">
+                  {(currentProject.dynamicSections || []).sort((a,b)=>a.order-b.order).map((section, idx, arr) => (
+                    <div key={section.id} className="bg-white/5 p-4 rounded-xl border border-white/10 relative group">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-xs uppercase font-bold text-white/50 tracking-widest">{section.type} Block</span>
+                        <div className="flex gap-2">
+                           <button onClick={() => {
+                             if (idx === 0) return;
+                             const newSecs = [...arr];
+                             [newSecs[idx].order, newSecs[idx-1].order] = [newSecs[idx-1].order, newSecs[idx].order];
+                             setCurrentProject({...currentProject, dynamicSections: newSecs});
+                           }} className="p-1 hover:bg-white/10 rounded text-secondary hover:text-white">↑</button>
+                           <button onClick={() => {
+                             if (idx === arr.length - 1) return;
+                             const newSecs = [...arr];
+                             [newSecs[idx].order, newSecs[idx+1].order] = [newSecs[idx+1].order, newSecs[idx].order];
+                             setCurrentProject({...currentProject, dynamicSections: newSecs});
+                           }} className="p-1 hover:bg-white/10 rounded text-secondary hover:text-white">↓</button>
+                           <button onClick={() => {
+                             setCurrentProject({...currentProject, dynamicSections: arr.filter(s => s.id !== section.id)});
+                           }} className="p-1 hover:bg-red-500/20 text-red-500 rounded">✕</button>
+                        </div>
+                      </div>
+                      
+                      {section.type === 'text' && (
+                         <textarea className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none min-h-[100px] text-white" value={section.content} onChange={e => {
+                           const newSecs = [...arr];
+                           newSecs[idx] = {...section, content: e.target.value};
+                           setCurrentProject({...currentProject, dynamicSections: newSecs});
+                         }} placeholder="Markdown / HTML Text Content" />
+                      )}
+                      {section.type === 'image' && (
+                         <div className="mt-2 relative z-50">
+                           <ImageInput placeholder="Image URL (Click upload button or paste)" value={section.content} onChange={(e: any) => {
+                             const newSecs = [...arr];
+                             newSecs[idx] = {...section, content: e.target.value};
+                             setCurrentProject({...currentProject, dynamicSections: newSecs});
+                           }} />
+                         </div>
+                      )}
+                      {section.type === 'video' && (
+                         <input className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none text-white" value={section.content} onChange={e => {
+                           const newSecs = [...arr];
+                           newSecs[idx] = {...section, content: e.target.value};
+                           setCurrentProject({...currentProject, dynamicSections: newSecs});
+                         }} placeholder="Video Embed URL (YouTube/Vimeo)" />
+                      )}
+                    </div>
+                  ))}
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    <button onClick={() => setCurrentProject({...currentProject, dynamicSections: [...(currentProject.dynamicSections||[]), {id: crypto.randomUUID(), type: 'text', content: '', order: (currentProject.dynamicSections?.length||0)}]})} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest">+ Text</button>
+                    <button onClick={() => setCurrentProject({...currentProject, dynamicSections: [...(currentProject.dynamicSections||[]), {id: crypto.randomUUID(), type: 'image', content: '', order: (currentProject.dynamicSections?.length||0)}]})} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest">+ Image</button>
+                    <button onClick={() => setCurrentProject({...currentProject, dynamicSections: [...(currentProject.dynamicSections||[]), {id: crypto.randomUUID(), type: 'video', content: '', order: (currentProject.dynamicSections?.length||0)}]})} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest">+ Video</button>
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-4 cursor-pointer p-5 bg-white/5 rounded-2xl border border-white/10 mt-6">
                   <input type="checkbox" checked={!!currentProject.featured} onChange={e => setCurrentProject({...currentProject, featured: e.target.checked})} className="w-6 h-6 accent-primary rounded-md" />
                   <span className="font-medium">Featured Project</span>
                 </label>
