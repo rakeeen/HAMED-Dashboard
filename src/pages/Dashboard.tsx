@@ -57,6 +57,38 @@ export const Dashboard = () => {
     return () => { unsubInq(); unsubAna(); };
   }, []);
 
+  const lastSavedData = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (projects.length === 0 && !siteConfig.name) return; // Ignore unmounted state
+    
+    // Stringify heavy snapshot
+    const currentData = JSON.stringify({ siteConfig, projects, timeline, competencies, settings });
+    if (lastSavedData.current === null) {
+      lastSavedData.current = currentData;
+      return;
+    }
+    
+    if (currentData === lastSavedData.current) return; // No delta
+
+    const timer = setTimeout(async () => {
+      try {
+        setSaveStatus('Auto-saving...');
+        await setDoc(doc(db, 'content', 'main'), {
+          siteConfig, projects, timeline, competencies, settings
+        });
+        lastSavedData.current = currentData;
+        setSaveStatus('All changes saved');
+        setTimeout(() => setSaveStatus(null), 2500);
+      } catch (e) {
+        console.error("Auto-save failed", e);
+        setSaveStatus('Auto-save failed');
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [siteConfig, projects, timeline, competencies, settings]);
+
   const t = DASHBOARD_I18N[lang];
   const isRTL = lang === 'ar';
 
