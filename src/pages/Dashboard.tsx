@@ -226,20 +226,43 @@ export const Dashboard = () => {
                 if (activeTab === 'experience') { setCurrentTimeline({}); setIsEditingTimeline(true); }
                 if (activeTab === 'competencies') { setCurrentCompetency({}); setIsEditingCompetency(true); }
               }}
-              className="text-white border border-white/20 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-white/10 transition-all cursor-pointer z-10"
+              className="text-white border border-white/20 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-white/10 transition-all cursor-pointer z-10 print:hidden"
             >
               <Plus size={14} />
               {t.add_new}
             </button>
           )}
 
-          <button 
-            onClick={handleSave}
-            className="bg-white text-on-primary px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-neutral-200 transition-all cursor-pointer z-10 print:hidden"
-          >
-            <Save size={14} />
-            {t.save}
-          </button>
+          {activeTab === 'clients' && (
+            <>
+              <button 
+                onClick={async () => {
+                  inquiries.forEach(inq => {
+                    if (!inq.read) updateDoc(doc(db, 'inquiries', inq.id), { read: true }).catch(console.error);
+                  });
+                }} 
+                className="text-white border border-white/20 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-white/10 transition-all cursor-pointer z-10 print:hidden"
+              >
+                Mark All Read
+              </button>
+              <button onClick={() => window.print()} className="text-white border border-white/20 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-white/10 transition-all cursor-pointer z-10 print:hidden">
+                <Download size={14} /> Export PDF
+              </button>
+              <button onClick={clearInquiries} className="text-red-500 border border-red-500/20 px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-red-500/10 transition-all cursor-pointer z-10 print:hidden">
+                <Trash size={14} /> Clear Inbox
+              </button>
+            </>
+          )}
+
+          {activeTab !== 'clients' && (
+            <button 
+              onClick={handleSave}
+              className="bg-white text-on-primary px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-neutral-200 transition-all cursor-pointer z-10 print:hidden"
+            >
+              <Save size={14} />
+              {t.save}
+            </button>
+          )}
         </div>
 
         {/* Tab Content */}
