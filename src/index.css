@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Lora", ui-sans-serif, system-ui, sans-serif;
+  --font-sketch: "Caveat", cursive;
+  --font-mono: "Space Mono", monospace;
+
+  /* Core Palette */
+  --paper: #0a0908;
+  --paper-dark: #0e0d0c;
+  --ink: #e9e2d2;
+  --ink-faded: #a59e92;
+  --ink-light: #7c7265;
+  --sepia: #d1b16c;
+  --rust: #d97858;
+  --forest: #7ca87c;
+  --charcoal: #e6dfd1;
+  --cream: #12100e;
+  --tape: rgba(233, 226, 210, 0.1);
+
+  --color-background: var(--paper);
+  --color-surface: var(--paper-dark);
+  --color-primary: var(--ink);
+  --color-secondary: var(--ink-faded);
+  
+  --radius-organic: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --radius-btn: 180px 8px 160px 8px / 8px 160px 8px 180px;
+}
+
+@layer base {
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    @apply antialiased;
+    background-image: radial-gradient(rgba(233, 226, 210, 0.03) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .sketch-font { font-family: var(--font-sketch); }
+  
+  .hand-card {
+    background: var(--cream);
+    border: 1.5px solid var(--ink-light);
+    border-radius: var(--radius-organic);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .polaroid {
+    background: var(--ink);
+    padding: 12px 12px 48px;
+    box-shadow: 4px 6px 0 rgba(0,0,0,0.2);
+    border: 1.5px solid var(--ink-light);
+    color: var(--paper);
+  }
+
+  .sketchy-border {
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-btn);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(180deg, #E8DFD7 0%, #a3a3a3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .metallic-gradient {
+    background: linear-gradient(180deg, #E8DFD7 0%, #E2E2E2 100%);
+  }
+
+  .glass-panel {
+    @apply bg-surface-container/60 backdrop-blur-xl;
+  }
+}
+
+@media (pointer: fine) {
+  html, body, *, *::before, *::after, a, button, input {
+    cursor: none !important;
+  }
+}
+
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px #1E1E1E inset !important; -webkit-text-fill-color: white !important; transition: background-color 5000s ease-in-out 0s; }
+
+
+@media print { body { background-color: white !important; color: black !important; } nav, header, aside, .print\:hidden { display: none !important; } main { background: transparent !important; padding: 0 !important; border: 0 !important; } } 
+
