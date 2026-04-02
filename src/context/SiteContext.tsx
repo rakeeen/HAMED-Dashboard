@@ -42,7 +42,7 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
   const [timeline, setTimeline] = useState(DEFAULT_TIMELINE);
   const [competencies, setCompetencies] = useState(DEFAULT_COMPETENCIES);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-  const [settings, setSettings] = useState<UISettings>({ showCursor: true, theme: 'dark' });
+  const [settings, setSettings] = useState<UISettings>({ showCursor: true, theme: 'light' });
 
   useEffect(() => {
     const docRef = doc(db, 'content', 'main');
@@ -62,7 +62,7 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
           projects: DEFAULT_PROJECTS,
           timeline: DEFAULT_TIMELINE,
           competencies: DEFAULT_COMPETENCIES,
-          settings: { showCursor: true, theme: 'dark' }
+          settings: { showCursor: true, theme: 'light' }
         };
         setDoc(docRef, initialData);
       }

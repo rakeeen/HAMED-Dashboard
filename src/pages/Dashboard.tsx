@@ -28,6 +28,7 @@ export const Dashboard = () => {
   
   const [activeTab, setActiveTab] = useState<DashboardTab>('analytics');
   const [lang, setLang] = useState<DashboardLang>('en');
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   const [adminEmail, setAdminEmail] = useState(localStorage.getItem('hamed_admin_email') || 'admin@admin.com');
@@ -59,6 +60,14 @@ export const Dashboard = () => {
     });
     return () => { unsubInq(); unsubAna(); };
   }, []);
+
+  React.useEffect(() => {
+    if (settings?.theme === 'dark') {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  }, [settings?.theme]);
 
   const lastSavedData = React.useRef<string | null>(null);
 
@@ -203,11 +212,11 @@ export const Dashboard = () => {
   };
 
   const tabs: { id: DashboardTab; label: string; icon: any; badge?: number }[] = [
-    { id: 'analytics', label: isRTL ? 'التحليلات والطلبات' : 'Analytics & Leads', icon: Users, badge: inquiries.filter(i => !i.read).length },
-    { id: 'branding', label: isRTL ? 'الهوية الشخصية' : 'Identity & Branding', icon: FileText },
-    { id: 'projects', label: isRTL ? 'المعرض الفني' : 'Portfolio', icon: FolderKanban },
-    { id: 'resume', label: isRTL ? 'السيرة والمهارات' : 'Resume & Skills', icon: Briefcase },
-    { id: 'settings', label: isRTL ? 'إعدادات النظام' : 'System Tools', icon: Settings },
+    { id: 'analytics', label: t.nav_analytics, icon: Users, badge: inquiries.filter(i => !i.read).length },
+    { id: 'branding', label: t.nav_branding, icon: FileText },
+    { id: 'projects', label: t.nav_projects, icon: FolderKanban },
+    { id: 'resume', label: t.nav_resume, icon: Briefcase },
+    { id: 'settings', label: t.nav_settings, icon: Settings },
   ];
 
   return (
@@ -241,18 +250,27 @@ export const Dashboard = () => {
         </nav>
 
         <div className="pt-8 mt-8 border-t border-white/5 px-4">
-            <div className="flex gap-2">
-                {(['en', 'ar', 'it'] as DashboardLang[]).map(l => (
-                    <button 
-                        key={l}
-                        onClick={() => setLang(l)}
-                        className={`text-[10px] uppercase font-bold px-3 py-1.5 rounded-full border transition-all ${lang === l ? 'bg-white text-black border-white' : 'border-white/10 text-secondary hover:border-white/30'}`}
-                    >
-                        {l}
-                    </button>
-                ))}
+            <div className={`custom-select-container ${isLangOpen ? 'active' : ''}`} onClick={() => setIsLangOpen(!isLangOpen)}>
+                <div className="custom-select-trigger uppercase">
+                    {lang}
+                </div>
+                <div className="custom-select-options">
+                    {(['en', 'ar', 'it'] as DashboardLang[]).map((l) => (
+                        <div 
+                            key={l} 
+                            className={`custom-select-option ${lang === l ? 'selected' : ''}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setLang(l);
+                                setIsLangOpen(false);
+                            }}
+                        >
+                            {l.toUpperCase()}
+                        </div>
+                    ))}
+                </div>
             </div>
-            <p className="text-[9px] uppercase text-secondary/30 mt-3 tracking-widest">Editor Language</p>
+            <p className="text-[9px] uppercase text-secondary/30 mt-3 tracking-widest">{t.language}</p>
         </div>
       </aside>
 
@@ -263,6 +281,22 @@ export const Dashboard = () => {
         <div className="absolute top-8 right-8 flex items-center gap-4">
           {saveStatus && <span className="text-xs text-secondary animate-pulse">{saveStatus}</span>}
           
+          <button 
+            onClick={() => updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })} 
+            className="p-3 sketchy-border bg-white/5 hover:bg-white/10 transition-all text-primary"
+            title={t.toggle_theme}
+          >
+            {settings.theme === 'dark' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1-8.313-12.454z" />
+                </svg>
+            ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                </svg>
+            )}
+          </button>
           
           {['projects', 'resume'].includes(activeTab) && (
             <button 
@@ -550,27 +584,27 @@ export const Dashboard = () => {
           {activeTab === 'settings' && (
             <div className="space-y-12 max-w-4xl">
               <div>
-                <h2 className="text-3xl font-black uppercase tracking-tight sketch-font mb-2">{isRTL ? 'إعدادات المنصة' : 'System Tools'}</h2>
-                <p className="text-xs text-secondary opacity-50 uppercase tracking-widest">Security and cloud synchronization</p>
+                <h2 className="text-3xl font-black uppercase tracking-tight sketch-font mb-2">{t.nav_settings}</h2>
+                <p className="text-xs text-secondary opacity-50 uppercase tracking-widest">{t.gatekeeper_desc}</p>
               </div>
 
               <div className="grid grid-cols-1 gap-8">
                 <div className="p-8 sketchy-border bg-white/5 space-y-8">
                   <div>
-                    <h3 className="text-lg font-black uppercase tracking-widest sketch-font mb-2">Gatekeeper Security</h3>
-                    <p className="text-xs text-secondary opacity-60">Credentials for this specific dashboard access.</p>
+                    <h3 className="text-lg font-black uppercase tracking-widest sketch-font mb-2">{t.gatekeeper}</h3>
+                    <p className="text-xs text-secondary opacity-60">{t.gatekeeper_desc}</p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-secondary opacity-40 ml-1">Admin Identity</label>
+                      <label className="text-[10px] uppercase tracking-widest text-secondary opacity-40 ml-1">{t.admin_identity}</label>
                       <input className="w-full bg-black/20 border-b border-white/10 p-3 text-sm outline-none focus:border-primary"
                         type="email" value={adminEmail} 
                         onChange={(e) => { setAdminEmail(e.target.value); localStorage.setItem('hamed_admin_email', e.target.value); }} 
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase tracking-widest text-secondary opacity-40 ml-1">Secret Key</label>
+                      <label className="text-[10px] uppercase tracking-widest text-secondary opacity-40 ml-1">{t.secret_key}</label>
                       <input className="w-full bg-black/20 border-b border-white/10 p-3 text-sm outline-none focus:border-primary"
                         type="text" value={adminPass} 
                         onChange={(e) => { setAdminPass(e.target.value); localStorage.setItem('hamed_admin_pass', e.target.value); }} 
@@ -579,16 +613,41 @@ export const Dashboard = () => {
                   </div>
                 </div>
 
+                <div className="p-8 sketchy-border bg-white/5 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-black uppercase tracking-widest sketch-font mb-2">{t.interface_prefs}</h3>
+                    <p className="text-xs text-secondary opacity-60">{t.interface_desc}</p>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+                            className="sketchy-btn px-10 py-3"
+                        >
+                            {t.toggle_theme} ({settings.theme === 'dark' ? t.theme_dark : t.theme_light})
+                        </button>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => updateSettings({ showCursor: !settings.showCursor })}
+                            className={`sketchy-btn px-10 py-3 ${settings.showCursor ? 'filled' : ''}`}
+                        >
+                            {t.toggle_cursor} ({settings.showCursor ? 'ON' : 'OFF'})
+                        </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-8 sketchy-border bg-rust/5 border-rust/20 space-y-6">
                   <div>
                     <h3 className="text-lg font-black uppercase tracking-widest sketch-font mb-2 text-rust">Sync Engine</h3>
-                    <p className="text-xs text-secondary opacity-60">Push all local code defaults to the live Firebase database. This will merge and sync project structures with current localized content.</p>
+                    <p className="text-xs text-secondary opacity-60">{t.sync_desc}</p>
                   </div>
                   <button 
                     onClick={() => {
                         setConfirmDialog({
-                            title: "Initialize Cloud Sync?",
-                            desc: "This will synchronize your live site with the latest code defaults. High risk operation.",
+                            title: t.sync_warning,
+                            desc: t.sync_warning,
                             onConfirm: async () => {
                                 setConfirmDialog(null);
                                 setSaveStatus('Syncing...');
@@ -596,7 +655,7 @@ export const Dashboard = () => {
                                     await setDoc(doc(db, 'content', 'main'), {
                                         siteConfig: DEFAULT_CONFIG, projects: DEFAULT_PROJECTS,
                                         timeline: DEFAULT_TIMELINE, competencies: DEFAULT_COMPETENCIES,
-                                        settings: { showCursor: true, theme: 'dark' }
+                                        settings: { showCursor: true, theme: 'light' }
                                     });
                                     setSaveStatus('Cloud Synced Sucessfully');
                                     setTimeout(() => window.location.reload(), 1500);
@@ -607,7 +666,7 @@ export const Dashboard = () => {
                     className="sketchy-btn filled w-full md:w-auto"
                     style={{ backgroundColor: 'var(--rust)', borderColor: 'var(--rust)' }}
                   >
-                    Force Cloud Sync (Push Local)
+                    {t.sync_cloud}
                   </button>
                 </div>
               </div>
@@ -624,34 +683,31 @@ export const Dashboard = () => {
           <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#0e0d0c] w-full max-w-2xl sketchy-border p-8 md:p-10 max-h-[90vh] overflow-y-auto relative">
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-3xl font-black uppercase tracking-tight sketch-font">{isRTL ? 'تعديل المعرض' : 'Edit Case Study'}</h3>
+                <h3 className="text-3xl font-black uppercase tracking-tight sketch-font">{t.edit_project}</h3>
                 <button onClick={() => setIsEditingProject(false)} className="p-3 sketchy-border hover:bg-white/5 transition-colors"><X size={18} /></button>
               </div>
               <div className="space-y-10">
-                <LocalizedInput label="Project Title" value={currentProject.title} onChange={(val: any) => setCurrentProject({...currentProject, title: val})} />
-                <LocalizedTextarea label="Short Description" value={currentProject.description} onChange={(val: any) => setCurrentProject({...currentProject, description: val})} />
-                <LocalizedInput label="Category" value={currentProject.category} onChange={(val: any) => setCurrentProject({...currentProject, category: val})} />
+                <LocalizedInput label={t.project_title} value={currentProject.title} onChange={(val: any) => setCurrentProject({...currentProject, title: val})} />
+                <LocalizedTextarea label={t.short_desc} value={currentProject.description} onChange={(val: any) => setCurrentProject({...currentProject, description: val})} />
+                <LocalizedInput label={t.category} value={currentProject.category} onChange={(val: any) => setCurrentProject({...currentProject, category: val})} />
                 
-                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Project Images</h4>
+                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">{t.project_images}</h4>
                 <ImageInput placeholder="Card Cover Image URL" value={currentProject.image || ''} onChange={(e: any) => setCurrentProject({...currentProject, image: e.target.value})} />
-                <ImageInput placeholder="Detail Preview Image 1 URL" value={currentProject.detailImages?.[0] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} />
-                <ImageInput placeholder="Detail Preview Image 2 URL" value={currentProject.detailImages?.[1] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} />
-                <ImageInput placeholder="Detail Preview Image 3 URL" value={currentProject.detailImages?.[2] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', currentProject.detailImages?.[1] || '', e.target.value]})} />
                 
-                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Project Credits</h4>
+                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">{t.project_credits}</h4>
                 <div className="grid grid-cols-1 gap-4">
-                  <LocalizedInput label="Client" value={currentProject.client} onChange={(val: any) => setCurrentProject({...currentProject, client: val})} />
-                  <LocalizedInput label="Role" value={currentProject.role} onChange={(val: any) => setCurrentProject({...currentProject, role: val})} />
-                  <LocalizedInput label="Duration" value={currentProject.duration} onChange={(val: any) => setCurrentProject({...currentProject, duration: val})} />
+                  <LocalizedInput label={isRTL ? 'العميل' : 'Client'} value={currentProject.client} onChange={(val: any) => setCurrentProject({...currentProject, client: val})} />
+                  <LocalizedInput label={isRTL ? 'الدور' : 'Role'} value={currentProject.role} onChange={(val: any) => setCurrentProject({...currentProject, role: val})} />
+                  <LocalizedInput label={isRTL ? 'المدة' : 'Duration'} value={currentProject.duration} onChange={(val: any) => setCurrentProject({...currentProject, duration: val})} />
                 </div>
 
-                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">Deep Dive Details</h4>
-                <LocalizedTextarea label="Strategy & Approach" value={currentProject.strategy} onChange={(val: any) => setCurrentProject({...currentProject, strategy: val})} />
-                <LocalizedTextarea label="The Challenge" value={currentProject.challenge} onChange={(val: any) => setCurrentProject({...currentProject, challenge: val})} />
-                <LocalizedTextarea label="The Solution" value={currentProject.solution} onChange={(val: any) => setCurrentProject({...currentProject, solution: val})} />
-                <LocalizedTextarea label="Architecture Highlights" value={currentProject.architecture} onChange={(val: any) => setCurrentProject({...currentProject, architecture: val})} />
+                <h4 className="pt-2 font-bold text-sm uppercase tracking-widest text-white/50 border-t border-white/10">{t.deep_dive}</h4>
+                <LocalizedTextarea label={isRTL ? 'الاستراتيجية والنهج' : 'Strategy & Approach'} value={currentProject.strategy} onChange={(val: any) => setCurrentProject({...currentProject, strategy: val})} />
+                <LocalizedTextarea label={isRTL ? 'التحدي' : 'The Challenge'} value={currentProject.challenge} onChange={(val: any) => setCurrentProject({...currentProject, challenge: val})} />
+                <LocalizedTextarea label={isRTL ? 'الحل' : 'The Solution'} value={currentProject.solution} onChange={(val: any) => setCurrentProject({...currentProject, solution: val})} />
+                <LocalizedTextarea label={isRTL ? 'أبرز الهياكل' : 'Architecture Highlights'} value={currentProject.architecture} onChange={(val: any) => setCurrentProject({...currentProject, architecture: val})} />
 
-                <h4 className="pt-8 pb-4 font-bold text-sm uppercase tracking-widest text-white border-t border-white/10">Dynamic Sections (Dribbble Model)</h4>
+                <h4 className="pt-8 pb-4 font-bold text-sm uppercase tracking-widest text-white border-t border-white/10">{t.dynamic_sections}</h4>
                 <div className="space-y-4">
                   {(currentProject.dynamicSections || []).sort((a,b)=>a.order-b.order).map((section, idx, arr) => (
                     <div key={section.id} className="bg-white/5 p-4 rounded-xl border border-white/10 relative group">
@@ -710,9 +766,9 @@ export const Dashboard = () => {
 
                 <label className="flex items-center gap-4 cursor-pointer p-6 bg-white/5 sketchy-border mt-10">
                   <input type="checkbox" checked={!!currentProject.featured} onChange={e => setCurrentProject({...currentProject, featured: e.target.checked})} className="w-6 h-6 accent-primary rounded-md" />
-                  <span className="font-bold uppercase tracking-widest text-xs">Mark as Featured on Homepage</span>
+                  <span className="font-bold uppercase tracking-widest text-xs">{t.featured_home}</span>
                 </label>
-                <button onClick={saveProject} className="sketchy-btn filled w-full mt-10 py-5 text-xl">Deposit Changes</button>
+                <button onClick={saveProject} className="sketchy-btn filled w-full mt-10 py-5 text-xl">{t.deposit_changes}</button>
               </div>
             </motion.div>
           </div>
@@ -722,15 +778,15 @@ export const Dashboard = () => {
           <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#0e0d0c] w-full max-w-2xl sketchy-border p-8 md:p-10 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-3xl font-black uppercase tracking-tight sketch-font">{isRTL ? 'تعديل الخبرة' : 'Edit Career Entry'}</h3>
+                <h3 className="text-3xl font-black uppercase tracking-tight sketch-font">{t.edit_experience}</h3>
                 <button onClick={() => setIsEditingTimeline(false)} className="p-3 sketchy-border hover:bg-white/5 transition-colors"><X size={18} /></button>
               </div>
               <div className="space-y-8">
-                <LocalizedInput label="Role / Title" value={currentTimeline.role} onChange={(val: any) => setCurrentTimeline({...currentTimeline, role: val})} />
-                <LocalizedInput label="Company Name" value={currentTimeline.company} onChange={(val: any) => setCurrentTimeline({...currentTimeline, company: val})} />
-                <LocalizedInput label="Year / Duration" value={currentTimeline.year} onChange={(val: any) => setCurrentTimeline({...currentTimeline, year: val})} />
-                <LocalizedTextarea label="Key Contributions" value={currentTimeline.description} onChange={(val: any) => setCurrentTimeline({...currentTimeline, description: val})} />
-                <button onClick={saveTimeline} className="sketchy-btn filled w-full mt-10 py-5 text-xl">Update Timeline</button>
+                <LocalizedInput label={t.role_title} value={currentTimeline.role} onChange={(val: any) => setCurrentTimeline({...currentTimeline, role: val})} />
+                <LocalizedInput label={t.company_name} value={currentTimeline.company} onChange={(val: any) => setCurrentTimeline({...currentTimeline, company: val})} />
+                <LocalizedInput label={t.year_duration} value={currentTimeline.year} onChange={(val: any) => setCurrentTimeline({...currentTimeline, year: val})} />
+                <LocalizedTextarea label={t.key_contributions} value={currentTimeline.description} onChange={(val: any) => setCurrentTimeline({...currentTimeline, description: val})} />
+                <button onClick={saveTimeline} className="sketchy-btn filled w-full mt-10 py-5 text-xl">{t.update_timeline}</button>
               </div>
             </motion.div>
           </div>
@@ -740,16 +796,16 @@ export const Dashboard = () => {
           <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#0e0d0c] w-full max-w-xl sketchy-border p-8 md:p-10 overflow-y-auto">
               <div className="flex justify-between items-center mb-10">
-                <h3 className="text-3xl font-black uppercase tracking-tight sketch-font">{isRTL ? 'تعديل المهارة' : 'Edit Domain competency'}</h3>
+                <h3 className="text-3xl font-black uppercase tracking-tight sketch-font">{t.edit_skill}</h3>
                 <button onClick={() => setIsEditingCompetency(false)} className="p-3 sketchy-border hover:bg-white/5 transition-colors"><X size={18} /></button>
               </div>
               <div className="space-y-8">
-                <LocalizedInput label="Skill Category" value={currentCompetency.title} onChange={(val: any) => setCurrentCompetency({...currentCompetency, title: val})} />
+                <LocalizedInput label={t.skill_category} value={currentCompetency.title} onChange={(val: any) => setCurrentCompetency({...currentCompetency, title: val})} />
                 <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-black tracking-widest text-secondary opacity-40 ml-1">Icon Identifier (Material Symbols)</label>
+                    <label className="text-[10px] uppercase font-black tracking-widest text-secondary opacity-40 ml-1">{t.icon_id}</label>
                     <input className="w-full bg-black/20 border-b border-white/10 p-3 text-sm outline-none focus:border-primary" value={currentCompetency.icon || ''} onChange={e => setCurrentCompetency({...currentCompetency, icon: e.target.value})} />
                 </div>
-                <button onClick={saveCompetency} className="sketchy-btn filled w-full mt-10 py-5 text-xl">Confirm Skill Update</button>
+                <button onClick={saveCompetency} className="sketchy-btn filled w-full mt-10 py-5 text-xl">{t.confirm_skill}</button>
               </div>
             </motion.div>
           </div>
@@ -783,12 +839,12 @@ export const Dashboard = () => {
               <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.2)] border border-red-500/30">
                 <AlertTriangle size={24} />
               </div>
-              <h3 className="text-2xl font-bold text-red-400 mb-4">System Notice</h3>
+              <h3 className="text-2xl font-bold text-red-400 mb-4">{t.system_notice}</h3>
               <div className="bg-red-500/10 rounded-2xl p-5 text-sm text-red-200/80 whitespace-pre-wrap leading-relaxed border border-red-500/20 font-sans text-left mb-8 max-h-64 overflow-y-auto">
                 {alertMessage}
               </div>
               <button onClick={() => setAlertMessage(null)} className="w-full bg-red-500/20 text-red-400 border border-red-500/30 py-4 rounded-full font-bold uppercase tracking-wider cursor-pointer hover:bg-red-500/30 active:scale-95 transition-all">
-                Acknowledge Error
+                {t.acknowledge}
               </button>
             </motion.div>
           </div>
