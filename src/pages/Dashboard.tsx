@@ -35,11 +35,7 @@ export const Dashboard = () => {
   } = useSiteContext();
   
   const [activeTab, setActiveTab] = useState<DashboardTab>('analytics');
-  const [lang, setLang] = useState<DashboardLang>(() => {
-    const browserLang = navigator.language.split('-')[0];
-    if (['en', 'ar', 'it'].includes(browserLang)) return browserLang as DashboardLang;
-    return 'en';
-  });
+  const [lang, setLang] = useState<DashboardLang>('en');
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   const [adminEmail, setAdminEmail] = useState(localStorage.getItem('hamed_admin_email') || 'hamed@design.com');
