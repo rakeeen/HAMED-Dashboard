@@ -12,8 +12,13 @@ export const CustomCursor = () => {
   return (
     <div
       ref={cursorRef}
-      className="fixed top-0 left-0 pointer-events-none z-[9999] hidden md:block"
+      className="custom-cursor-wrapper"
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        pointerEvents: 'none',
+        zIndex: 9999,
         width: '24px',
         height: '24px',
         transform: 'translate(-50%, -50%)',

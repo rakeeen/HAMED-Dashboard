@@ -62,7 +62,15 @@ export const LocalizedTextarea: React.FC<LocalizedProps> = ({ label, value, onCh
   );
 };
 
-export const ImageInput: React.FC<{ label?: string; value: string; onChange: (e: any) => void; placeholder?: string }> = ({ label, value, onChange, placeholder }) => {
+interface ImageInputProps {
+  label?: string;
+  value: string;
+  onChange: (e: any) => void;
+  onError?: (msg: string) => void;
+  placeholder?: string;
+}
+
+export const ImageInput: React.FC<ImageInputProps> = ({ label, value, onChange, onError, placeholder }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,26 +80,29 @@ export const ImageInput: React.FC<{ label?: string; value: string; onChange: (e:
 
     setUploading(true);
     try {
-      const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        "state_changed",
-        null,
-        (error) => {
-          console.error("Upload failed", error);
-          alert("Image upload failed!");
-          setUploading(false);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          // Simulate the change event structure expected by Dashboard.tsx handlers
-          onChange({ target: { value: downloadURL } });
-          setUploading(false);
-        }
-      );
-    } catch (err) {
-      console.error(err);
+      const formData = new FormData();
+      formData.append('file', file);
+      // Ensure you have an 'Unsigned' upload preset named 'ml_default' in Cloudinary Settings
+      formData.append('upload_preset', 'ml_default'); 
+      
+      const response = await fetch(`https://api.cloudinary.com/v1_1/dkw7eqxd2/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.secure_url) {
+        onChange({ target: { value: data.secure_url } });
+      } else {
+        const errorMsg = data.error?.message || "Cloudinary error occurred.";
+        if (onError) onError(errorMsg);
+        else alert(errorMsg);
+      }
+    } catch (err: any) {
+      if (onError) onError("Network error during image upload.");
+      else alert("Upload failed");
+    } finally {
       setUploading(false);
     }
   };

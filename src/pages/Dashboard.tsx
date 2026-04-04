@@ -57,6 +57,7 @@ export const Dashboard = () => {
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{ title: string; desc: string; onConfirm: () => void } | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   React.useEffect(() => {
     const unsubInq = onSnapshot(query(collection(db, 'inquiries'), orderBy('createdAt', 'desc')), (snap) => {
@@ -191,9 +192,30 @@ export const Dashboard = () => {
 
   return (
     <div className={`flex min-h-screen bg-paper text-ink selection:bg-sepia/20 ${isRTL ? 'font-arabic' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <SketchySidebar activeTab={activeTab} setActiveTab={setActiveTab} lang={lang} />
+      <SketchySidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        lang={lang} 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
       
-      <main className="flex-1 min-h-screen p-12 overflow-y-auto">
+      <main className="flex-1 min-h-screen p-6 md:p-12 overflow-y-auto">
+        {/* Mobile Header */}
+        <div className="flex md:hidden items-center justify-between mb-8 pb-4 border-b border-ink/5">
+           <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 sketchy-border hover:bg-ink/5"
+           >
+             <Pencil size={20} /> {/* Using Pencil as a sketchy menu icon or Menu if available */}
+           </button>
+           <div className="flex items-center gap-2">
+              <div className="w-8 h-8"><MascotFace /></div>
+              <h1 className="sketch-font text-xl font-bold">Hamed.</h1>
+           </div>
+           <div className="w-10" /> {/* Spacer */}
+        </div>
+
         <header className="flex justify-between items-center mb-16">
           <div>
              <h2 className="sketch-font text-5xl font-black lowercase tracking-tighter">
@@ -375,11 +397,13 @@ export const Dashboard = () => {
                     label={t.label_about_portrait} 
                     value={siteConfig.siteImages?.aboutPortrait || ''} 
                     onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, aboutPortrait: e.target.value }})} 
+                    onError={setAlertMessage}
                    />
                    <ImageInput 
                     label={t.label_contact_bg} 
                     value={siteConfig.siteImages?.contactBackground || ''} 
                     onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, contactBackground: e.target.value }})} 
+                    onError={setAlertMessage}
                    />
                 </div>
               </SketchyCard>
@@ -556,7 +580,7 @@ export const Dashboard = () => {
       {/* Modals */}
       <AnimatePresence>
         {isEditingProject && currentProject && (
-          <div className="fixed inset-0 bg-ink/80 z-[100] flex items-center justify-center p-6 overflow-y-auto backdrop-blur-sm">
+          <div className="fixed inset-0 bg-ink/70 z-[100] flex items-center justify-center p-6 overflow-y-auto backdrop-blur-xl">
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-5xl">
               <SketchyCard 
                 title=""
@@ -564,7 +588,7 @@ export const Dashboard = () => {
                 headerAction={null}
                 className="bg-paper !opacity-100 shadow-[0_0_120px_rgba(0,0,0,0.8)] relative border-[3px] border-sepia/40 overflow-hidden !p-0"
               >
-                <div className="bg-slate-900 px-8 py-6 border-b border-white/5 flex justify-between items-center text-paper">
+                <div className="bg-[#12100e] px-8 py-6 border-b border-white/5 flex justify-between items-center text-paper">
                   <div>
                     <h2 className="sketch-font text-2xl font-black">{t.modal_project}</h2>
                     <p className="text-[10px] uppercase font-bold opacity-60 tracking-wider">
@@ -574,7 +598,7 @@ export const Dashboard = () => {
                   <button onClick={() => setIsEditingProject(false)} className="p-3 sketchy-border border-white/20 hover:bg-rust hover:text-white transition-all shadow-lg text-paper"><X size={20} /></button>
                 </div>
                 
-                <div className="p-8 space-y-12 max-h-[75vh] overflow-y-auto scrollbar-thin bg-paper">
+                <div className="p-4 md:p-8 space-y-12 max-h-[85vh] overflow-y-auto scrollbar-thin bg-paper">
                   <div className="grid grid-cols-1 gap-10">
                     <LocalizedInput label={isRTL ? 'اسم المشروع' : "Project Title"} value={currentProject.title} onChange={(val: any) => setCurrentProject({...currentProject, title: val})} />
                     <LocalizedTextarea label={isRTL ? 'وصف مختصر' : "Short Pitch"} value={currentProject.description} onChange={(val: any) => setCurrentProject({...currentProject, description: val})} />
@@ -583,10 +607,10 @@ export const Dashboard = () => {
 
                   <SketchyCard title={isRTL ? 'الأصول المرئية' : "Visual Payload"} subtitle={isRTL ? 'الصور الأساسية' : "Main showcase assets"} className="bg-ink/5 border-none shadow-none translate-x-0 translate-y-0">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <ImageInput label={isRTL ? 'الغلاف الأساسي' : "Primary Cover"} value={currentProject.image || ''} onChange={(e: any) => setCurrentProject({...currentProject, image: e.target.value})} />
+                       <ImageInput label={isRTL ? 'الغلاف الأساسي' : "Primary Cover"} value={currentProject.image || ''} onChange={(e: any) => setCurrentProject({...currentProject, image: e.target.value})} onError={setAlertMessage} />
                        <div className="space-y-4">
-                          <ImageInput placeholder={isRTL ? 'تفاصيل 1' : "Detail 1"} value={currentProject.detailImages?.[0] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} />
-                          <ImageInput placeholder={isRTL ? 'تفاصيل 2' : "Detail 2"} value={currentProject.detailImages?.[1] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} />
+                          <ImageInput placeholder={isRTL ? 'تفاصيل 1' : "Detail 1"} value={currentProject.detailImages?.[0] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} onError={setAlertMessage} />
+                          <ImageInput placeholder={isRTL ? 'تفاصيل 2' : "Detail 2"} value={currentProject.detailImages?.[1] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} onError={setAlertMessage} />
                        </div>
                     </div>
                   </SketchyCard>
@@ -608,7 +632,7 @@ export const Dashboard = () => {
         )}
 
         {isEditingTimeline && currentTimeline && (
-          <div className="fixed inset-0 bg-ink/80 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-ink/70 z-[100] flex items-center justify-center p-6 backdrop-blur-xl">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl text-ink">
               <SketchyCard 
                 title=""
@@ -616,7 +640,7 @@ export const Dashboard = () => {
                 headerAction={null}
                 className="bg-paper !opacity-100 shadow-[0_0_120px_rgba(0,0,0,0.8)] border-[3px] border-sepia/40 overflow-hidden !p-0"
               >
-                <div className="bg-slate-900 px-8 py-6 border-b border-white/5 flex justify-between items-center text-paper">
+                <div className="bg-[#12100e] px-8 py-6 border-b border-white/5 flex justify-between items-center text-paper">
                    <h2 className="sketch-font text-2xl font-black">{t.modal_experience}</h2>
                    <button onClick={() => setIsEditingTimeline(false)} className="p-3 sketchy-border border-white/20 hover:bg-rust hover:text-white transition-all shadow-lg text-paper"><X size={20} /></button>
                 </div>
@@ -635,7 +659,7 @@ export const Dashboard = () => {
         )}
 
         {isEditingCompetency && currentCompetency && (
-          <div className="fixed inset-0 bg-ink/80 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-ink/70 z-[100] flex items-center justify-center p-6 backdrop-blur-xl">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl text-ink">
               <SketchyCard
                 title=""
@@ -643,7 +667,7 @@ export const Dashboard = () => {
                 headerAction={null}
                 className="bg-paper !opacity-100 shadow-[0_0_120px_rgba(0,0,0,0.8)] border-[3px] border-sepia/40 overflow-hidden !p-0"
               >
-                <div className="bg-slate-900 px-8 py-6 border-b border-white/5 flex justify-between items-center text-paper">
+                <div className="bg-[#12100e] px-8 py-6 border-b border-white/5 flex justify-between items-center text-paper">
                    <h2 className="sketch-font text-2xl font-black">{t.modal_skill}</h2>
                    <button onClick={() => setIsEditingCompetency(false)} className="p-3 sketchy-border border-white/20 hover:bg-rust hover:text-white transition-all shadow-lg text-paper"><X size={20} /></button>
                 </div>
@@ -691,6 +715,21 @@ export const Dashboard = () => {
                    <button onClick={() => setConfirmDialog(null)} className="py-3 sketchy-border font-black uppercase tracking-widest text-[10px] hover:bg-ink/5">{isRTL ? 'إلغاء' : 'Abort'}</button>
                    <button onClick={confirmDialog.onConfirm} className="py-3 sketchy-border bg-rust text-white border-rust font-black uppercase tracking-widest text-[10px] hover:shadow-lg transition-all">{isRTL ? 'متابعة' : 'Proceed'}</button>
                 </div>
+              </SketchyCard>
+            </motion.div>
+          </div>
+        )}
+        {alertMessage && (
+          <div className="fixed inset-0 bg-ink/80 z-[300] flex items-center justify-center p-6 backdrop-blur-xl">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm">
+              <SketchyCard title={isRTL ? 'تنبيه النظام' : "System Alert"} subtitle={isRTL ? 'إخطار هام' : "Important Notification"} className="bg-paper shadow-2xl border-[4px] border-sepia/30">
+                <div className="flex items-start gap-4 mb-8">
+                   <div className="p-2 sketchy-border bg-rust/10 text-rust">
+                      <AlertTriangle size={20} />
+                   </div>
+                   <p className="text-sm font-black opacity-80 leading-relaxed">{alertMessage}</p>
+                </div>
+                <button onClick={() => setAlertMessage(null)} className="w-full py-4 sketchy-border bg-ink text-paper font-black uppercase tracking-widest text-[10px] hover:shadow-lg transition-all">{isRTL ? 'فهمت' : 'Understood'}</button>
               </SketchyCard>
             </motion.div>
           </div>

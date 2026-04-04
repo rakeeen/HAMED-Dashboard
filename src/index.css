@@ -64,8 +64,21 @@
     font-family: var(--font-arabic) !important;
   }
 
-  * {
-    cursor: none !important;
+  /* Custom Cursor - Desktop Only (Based on Hover & Width) */
+  @media (min-width: 769px) and (hover: hover) {
+    *, a, button, input, textarea, select {
+      cursor: none !important;
+    }
+  }
+
+  /* On mobile/touch, use native cursor and hide custom one */
+  @media (max-width: 768px), (hover: none) {
+    *, a, button, input, textarea, select {
+      cursor: auto !important;
+    }
+    .custom-cursor-wrapper {
+      display: none !important;
+    }
   }
 
   ::selection {
