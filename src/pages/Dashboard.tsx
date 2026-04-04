@@ -269,10 +269,17 @@ export const Dashboard = () => {
 
         <div className="max-w-[1200px]">
 
-          
-          {/* Analytics & Leads Tab */}
-          {activeTab === 'analytics' && (
-            <div className="space-y-12">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              {/* Analytics & Leads Tab */}
+              {activeTab === 'analytics' && (
+                <div className="space-y-12">
               <div className="flex justify-end pr-4">
                  <button 
                   onClick={resetAnalytics}
@@ -594,6 +601,8 @@ export const Dashboard = () => {
               </SketchyCard>
             </div>
           )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
 
