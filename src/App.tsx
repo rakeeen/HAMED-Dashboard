@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, useLocation, Navigate } from 'reac
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
 import { SiteProvider, useSiteContext } from './context/SiteContext';
+import { CustomCursor } from './components/ui/CustomCursor';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -35,11 +36,12 @@ export default function App() {
     <SiteProvider>
       <Router>
         <ScrollToTop />
+        <ThemeSync />
+        <CustomCursor />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/*" element={
             <RequireAuth>
-              <ThemeSync />
               <Dashboard />
             </RequireAuth>
           } />

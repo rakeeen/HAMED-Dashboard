@@ -191,7 +191,6 @@ export const Dashboard = () => {
 
   return (
     <div className={`flex min-h-screen bg-paper text-ink selection:bg-sepia/20 ${isRTL ? 'font-arabic' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      <CustomCursor />
       <SketchySidebar activeTab={activeTab} setActiveTab={setActiveTab} lang={lang} />
       
       <main className="flex-1 min-h-screen p-12 overflow-y-auto">
