@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { CustomCursor } from './components/ui/CustomCursor';
 import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
 import { SiteProvider, useSiteContext } from './context/SiteContext';
@@ -21,24 +20,27 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Syncs the settings.theme to document.body so CSS variables update
+const ThemeSync = () => {
+  const { settings } = useSiteContext();
+  useEffect(() => {
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(settings.theme ?? 'dark');
+  }, [settings.theme]);
+  return null;
+};
+
 export default function App() {
   return (
     <SiteProvider>
       <Router>
         <ScrollToTop />
         <Routes>
-          <Route path="/login" element={
-            <div className="bg-background text-white selection:bg-primary/30 min-h-screen font-sans flex flex-col">
-              <DashboardCursorWrapper />
-              <Login />
-            </div>
-          } />
+          <Route path="/login" element={<Login />} />
           <Route path="/*" element={
             <RequireAuth>
-              <div className="bg-background text-white selection:bg-primary/30 min-h-screen font-sans flex flex-col">
-                <DashboardCursorWrapper />
-                <Dashboard />
-              </div>
+              <ThemeSync />
+              <Dashboard />
             </RequireAuth>
           } />
         </Routes>
@@ -46,9 +48,3 @@ export default function App() {
     </SiteProvider>
   );
 }
-
-const DashboardCursorWrapper = () => {
-  const { settings } = useSiteContext();
-  if (!settings.showCursor) return null;
-  return <CustomCursor />;
-};

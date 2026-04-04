@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react';
 import gsap from 'gsap';
-import { useLocation } from 'react-router-dom';
 
 export const useCustomCursor = (cursorRef: React.RefObject<HTMLDivElement>) => {
-  const location = useLocation();
-
   useEffect(() => {
     if (!cursorRef.current) return;
 
@@ -28,7 +25,8 @@ export const useCustomCursor = (cursorRef: React.RefObject<HTMLDivElement>) => {
       left: 0,
       pointerEvents: 'none',
       zIndex: 9999,
-      mixBlendMode: 'difference'
+      mixBlendMode: 'difference',
+      color: '#ffffff'
     });
 
     const handleMouseOver = (e: MouseEvent) => {
@@ -55,7 +53,7 @@ export const useCustomCursor = (cursorRef: React.RefObject<HTMLDivElement>) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, [cursorRef, location.pathname]);
+  }, [cursorRef]);
 
   return {};
 };

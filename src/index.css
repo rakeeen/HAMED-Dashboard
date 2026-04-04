@@ -1,23 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  /* Core Palette (Light) */
-  --paper: #f5f0e8;
-  --paper-dark: #ede8db;
-  --ink: #2a2018;
-  --ink-faded: #5a4e3a;
-  --ink-light: #9a8e7a;
-  --sepia: #8b6914;
-  --rust: #9b3a1a;
-  --forest: #1a3a2a;
-  --charcoal: #3a3530;
-  --cream: #faf6ee;
-  --tape: rgba(200,180,120,0.35);
-}
+@theme {
+  --font-sans: "Playfair Display", Georgia, serif;
+  --font-sketch: "Playfair Display", Georgia, serif;
+  --font-arabic: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-mono: "Space Mono", monospace;
 
-body.dark {
-  /* Core Palette (Dark) */
+  /* Core Palette - Dark (default) */
   --paper: #0a0908;
   --paper-dark: #0e0d0c;
   --ink: #e9e2d2;
@@ -29,24 +19,12 @@ body.dark {
   --charcoal: #e6dfd1;
   --cream: #12100e;
   --tape: rgba(233, 226, 210, 0.1);
-}
 
-@theme {
-  --font-sans: "Lora", ui-sans-serif, system-ui, sans-serif;
-  --font-sketch: "Cormorant Garamond", serif;
-  --font-mono: "Space Mono", monospace;
-
-  /* Color mapping */
   --color-background: var(--paper);
   --color-surface: var(--paper-dark);
-  --color-surface-container: var(--paper-dark);
+  --color-surface-container: #1a1a1a;
   --color-primary: var(--ink);
   --color-secondary: var(--ink-faded);
-  --color-sepia: var(--sepia);
-  --color-rust: var(--rust);
-  --color-forest: var(--forest);
-  --color-paper: var(--paper);
-  --color-ink: var(--ink);
 
   --radius-organic: 255px 15px 225px 15px / 15px 225px 15px 255px;
   --radius-btn: 180px 8px 160px 8px / 8px 160px 8px 180px;
@@ -57,16 +35,49 @@ body.dark {
     background: var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
+    font-style: normal;
     @apply antialiased;
     background-image: radial-gradient(rgba(233, 226, 210, 0.03) 1.5px, transparent 1.5px);
     background-size: 24px 24px;
     min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Light Mode */
+  body.light {
+    --paper: #f5f0e8;
+    --paper-dark: #ede8db;
+    --ink: #2a2018;
+    --ink-faded: #5a4e3a;
+    --ink-light: #9a8e7a;
+    --sepia: #8b6914;
+    --rust: #9b3a1a;
+    --forest: #1a3a2a;
+    --charcoal: #3a3530;
+    --cream: #faf6ee;
+    --tape: rgba(42, 32, 24, 0.15);
+    background-image: radial-gradient(rgba(42, 32, 24, 0.04) 1.5px, transparent 1.5px);
+  }
+
+  /* Arabic font */
+  [dir="rtl"], :lang(ar) {
+    font-family: var(--font-arabic) !important;
+  }
+
+  * {
+    cursor: none !important;
+  }
+
+  ::selection {
+    background: var(--sepia);
+    color: var(--paper);
   }
 }
 
 @layer utilities {
   .sketch-font { font-family: var(--font-sketch); }
-  
+  .font-arabic { font-family: var(--font-arabic); }
+
   .hand-card {
     background: var(--cream);
     border: 1.5px solid var(--ink-light);
@@ -76,44 +87,75 @@ body.dark {
   }
 
   .polaroid {
-    background: var(--ink);
+    background: var(--cream);
     padding: 12px 12px 48px;
     box-shadow: 4px 6px 0 rgba(0,0,0,0.2);
     border: 1.5px solid var(--ink-light);
-    color: var(--paper);
+    color: var(--ink);
   }
 
   .sketchy-border {
     border: 2px solid var(--ink);
     border-radius: var(--radius-btn);
   }
+  
+  .sketchy-btn {
+    font-family: var(--font-sketch);
+    font-size: 1rem;
+    font-weight: 700;
+    background: transparent;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-btn);
+    padding: 0.5rem 1.5rem;
+    color: var(--ink);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sketchy-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .sketchy-btn.filled {
+    background: var(--forest);
+    color: var(--cream);
+    border-color: var(--forest);
+  }
+  .sketchy-btn.filled:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .sketchy-btn:disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(180deg, #E8DFD7 0%, #a3a3a3 100%);
+    background: linear-gradient(180deg, var(--ink) 0%, var(--ink-faded) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .metallic-gradient {
-    background: linear-gradient(180deg, #E8DFD7 0%, #E2E2E2 100%);
-  }
-
   .glass-panel {
-    @apply bg-surface-container/60 backdrop-blur-xl;
+    background: color-mix(in srgb, var(--paper-dark) 60%, transparent);
+    backdrop-filter: blur(20px);
   }
 }
 
-@media (pointer: fine) {
-  html, body, *, *::before, *::after, a, button, input {
-    cursor: none !important;
-  }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--paper-dark) inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px #1E1E1E inset !important; -webkit-text-fill-color: white !important; transition: background-color 5000s ease-in-out 0s; }
-
-
-@media print { body { background-color: white !important; color: black !important; } nav, header, aside, .print\:hidden { display: none !important; } main { background: transparent !important; padding: 0 !important; border: 0 !important; } } 
-
+@media print {
+  body { background-color: white !important; color: black !important; }
+  nav, header, aside { display: none !important; }
+}

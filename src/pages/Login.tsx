@@ -1,100 +1,85 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Lock, LogIn } from 'lucide-react';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
 
 export const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Retrieve correct credentials from localStorage or use defaults
-    const adminEmail = localStorage.getItem('hamed_admin_email') || 'admin@admin.com';
-    const adminPass = localStorage.getItem('hamed_admin_pass') || 'admin';
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      const whitelistedEmail = 'Hamed.rakeeen@gmail.com'.toLowerCase();
+      const userEmail = user.email?.toLowerCase();
 
-    if (email === adminEmail && password === adminPass) {
-      if (rememberMe) {
+      // Case-Insensitive Whitelist Check
+      if (userEmail === whitelistedEmail) {
         localStorage.setItem('hamed_admin_auth', 'true');
+        navigate('/');
       } else {
-        sessionStorage.setItem('hamed_admin_auth', 'true');
+        await auth.signOut();
+        setError(`Unauthorized Access: ${user.email} is not in the whitelist.`);
       }
-      navigate('/');
-    } else {
-      setError('Invalid email or password');
+    } catch (err: any) {
+      console.error(err);
+      setError('Login Failed: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6 relative">
+    <div className="min-h-screen flex items-center justify-center bg-paper p-6 relative overflow-hidden">
       <div 
-        className="absolute inset-0 opacity-10 pointer-events-none" 
-        style={{ backgroundImage: 'radial-gradient(#ffffff 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} 
+        className="absolute inset-0 opacity-5 pointer-events-none" 
+        style={{ backgroundImage: 'radial-gradient(var(--ink) 1px, transparent 1px)', backgroundSize: '24px 24px' }} 
       />
       
-      <div className="w-full max-w-md bg-surface-container rounded-3xl p-10 md:p-12 border border-white/10 relative z-10">
-        <div className="flex justify-center mb-8 text-primary">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+      <div className="w-full max-w-md bg-[#0e0d0c] sketchy-border p-10 md:p-12 relative z-10 text-center">
+        <div className="flex justify-center mb-8">
+          <div className="p-4 sketchy-border bg-white/5 border-white/20 text-primary">
             <Lock size={28} />
           </div>
         </div>
         
-        <div className="text-center mb-10">
-          <h1 className="text-2xl font-black uppercase tracking-tighter mb-2">Dashboard Access</h1>
-          <p className="text-xs text-secondary/60 font-bold uppercase tracking-widest">Verify Identity</p>
+        <div className="mb-10">
+          <h1 className="text-3xl font-black uppercase tracking-tight sketch-font mb-2">Portfolio Gatekeeper</h1>
+          <p className="text-[10px] text-secondary/40 font-bold uppercase tracking-widest leading-relaxed">
+            Secure entry restricted to <br/> <span className="text-sepia">Hamed.rakeeen@gmail.com</span>
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm px-4 py-3 rounded-xl mb-6 text-center">
-            {error}
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs px-4 py-3 mb-8 sketchy-border rounded-none">
+             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-secondary font-bold">Email Address</label>
-            <input 
-              type="email" 
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:border-primary focus:bg-white/10 outline-none transition-all placeholder:text-white/20"
-              placeholder="admin@admin.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-secondary font-bold">Password</label>
-            <input 
-              type="password" 
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:border-primary focus:bg-white/10 outline-none transition-all placeholder:text-white/20"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+        <button 
+          onClick={handleGoogleLogin} 
+          disabled={loading}
+          className="sketchy-btn filled w-full flex items-center justify-center gap-3 py-4 text-lg hover:scale-[1.02] active:scale-95 transition-all"
+        >
+          {loading ? (
+             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              <LogIn size={20} />
+              Continue with Google
+            </>
+          )}
+        </button>
 
-          <label className="flex items-center gap-3 cursor-pointer mt-4">
-            <input 
-              type="checkbox" 
-              checked={rememberMe} 
-              onChange={(e) => setRememberMe(e.target.checked)} 
-              className="w-5 h-5 accent-primary rounded bg-white/10 border-white/20" 
-            />
-            <span className="text-sm text-secondary font-medium">Remember me for future visits</span>
-          </label>
-
-          <button 
-            type="submit" 
-            className="w-full bg-white text-black py-4 rounded-full font-bold uppercase tracking-widest mt-4 hover:bg-neutral-200 transition-colors cursor-pointer"
-          >
-            Authenticate
-          </button>
-        </form>
+        <p className="mt-10 text-[9px] uppercase tracking-widest text-secondary opacity-30">
+           Admin Clearance Required • AI Assisted Entry
+        </p>
       </div>
     </div>
   );

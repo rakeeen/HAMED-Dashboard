@@ -25,11 +25,14 @@ interface SiteContextType {
   competencies: Competency[];
   inquiries: Inquiry[];
   settings: UISettings;
+  isSyncing: boolean;
+  hasUnpublishedChanges: boolean;
   updateConfig: (config: Partial<typeof DEFAULT_CONFIG>) => void;
   updateProjects: (projects: Project[]) => void;
   updateTimeline: (timeline: TimelineItem[]) => void;
   updateCompetencies: (competencies: Competency[]) => void;
   updateSettings: (settings: Partial<UISettings>) => void;
+  publishContent: () => Promise<void>;
   addInquiry: (inquiry: Omit<Inquiry, 'id' | 'date' | 'status'>) => void;
   markInquiryRead: (id: string) => void;
 }
@@ -42,12 +45,13 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
   const [timeline, setTimeline] = useState(DEFAULT_TIMELINE);
   const [competencies, setCompetencies] = useState(DEFAULT_COMPETENCIES);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
-  const [settings, setSettings] = useState<UISettings>({ showCursor: true, theme: 'light' });
+  const [settings, setSettings] = useState<UISettings>({ showCursor: true, theme: 'dark' });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false);
 
+  // Initial Load from Firestore
   useEffect(() => {
     const docRef = doc(db, 'content', 'main');
-    
-    // Subscribe to Firestore changes
     const unsub = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -56,28 +60,71 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
         if (data.timeline) setTimeline(data.timeline);
         if (data.competencies) setCompetencies(data.competencies);
         if (data.settings) setSettings(data.settings);
-      } else {
-        const initialData = {
-          siteConfig: DEFAULT_CONFIG,
-          projects: DEFAULT_PROJECTS,
-          timeline: DEFAULT_TIMELINE,
-          competencies: DEFAULT_COMPETENCIES,
-          settings: { showCursor: true, theme: 'light' }
-        };
-        setDoc(docRef, initialData);
       }
     });
-
     return () => unsub();
   }, []);
 
+  // Debounced Auto-save for Site Config & Settings
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      setIsSyncing(true);
+      try {
+        const docRef = doc(db, 'content', 'main');
+        await setDoc(docRef, { 
+          siteConfig, 
+          settings 
+        }, { merge: true });
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+      } finally {
+        setIsSyncing(false);
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [siteConfig, settings]);
+
   const updateConfig = (config: Partial<typeof DEFAULT_CONFIG>) => setSiteConfig(prev => ({ ...prev, ...config }));
-  const updateProjects = (newProjects: Project[]) => setProjects(newProjects);
-  const updateTimeline = (newTimeline: TimelineItem[]) => setTimeline(newTimeline);
-  const updateCompetencies = (newCompetencies: Competency[]) => setCompetencies(newCompetencies);
+  
+  const updateProjects = (newProjects: Project[]) => {
+    setProjects(newProjects);
+    setHasUnpublishedChanges(true);
+  };
+  
+  const updateTimeline = (newTimeline: TimelineItem[]) => {
+    setTimeline(newTimeline);
+    setHasUnpublishedChanges(true);
+  };
+  
+  const updateCompetencies = (newCompetencies: Competency[]) => {
+    setCompetencies(newCompetencies);
+    setHasUnpublishedChanges(true);
+  };
+  
   const updateSettings = (newSettings: Partial<UISettings>) => setSettings(prev => ({ ...prev, ...newSettings }));
   
+  const publishContent = async () => {
+    setIsSyncing(true);
+    try {
+      const docRef = doc(db, 'content', 'main');
+      await setDoc(docRef, { 
+        projects, 
+        timeline, 
+        competencies 
+      }, { merge: true });
+      setHasUnpublishedChanges(false);
+    } catch (err) {
+      console.error('Publish failed:', err);
+      alert('Failed to publish changes. Check your connection.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const addInquiry = (inquiry: Omit<Inquiry, 'id' | 'date' | 'status'>) => {
+    // Inquiries are handled separately (usually incoming from the main site)
+    // For now, we just update local state
     const newInquiry: Inquiry = {
       ...inquiry,
       id: Math.random().toString(36).substr(2, 9),
@@ -99,11 +146,14 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
       competencies,
       inquiries,
       settings,
+      isSyncing,
+      hasUnpublishedChanges,
       updateConfig,
       updateProjects,
       updateTimeline,
       updateCompetencies,
       updateSettings,
+      publishContent,
       addInquiry,
       markInquiryRead
     }}>
