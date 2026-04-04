@@ -62,8 +62,8 @@ export const DASHBOARD_I18N = {
     btn_update: 'Update Records',
     btn_push_live: 'Push to Live',
     
-    syncing: 'Syncing to Cloud...',
-    ready: 'System Ready',
+    syncing: 'Syncing ya basha',
+    ready: 'All is done',
     pending: 'Pending Publish',
     
     label_en: 'English',
@@ -137,8 +137,8 @@ export const DASHBOARD_I18N = {
     btn_update: 'تحديث السجلات',
     btn_push_live: 'نشر التحديثات',
     
-    syncing: 'جاري المزامنة لسحابة...',
-    ready: 'النظام جاهز',
+    syncing: 'Syncing ya basha',
+    ready: 'All is done',
     pending: 'تحديثات معلقة',
     
     label_en: 'الإنجليزية',

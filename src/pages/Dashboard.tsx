@@ -254,13 +254,6 @@ export const Dashboard = () => {
           </div>
 
           <div className="flex items-center gap-6">
-            {isSyncing && (
-                <div className="flex items-center gap-2 text-sepia animate-pulse">
-                   <div className="w-1.5 h-1.5 bg-sepia rounded-full" />
-                   <span className="text-[10px] font-black uppercase tracking-widest">{t.syncing}</span>
-                </div>
-            )}
-            
             <div className="flex gap-3">
                {['projects', 'resume'].includes(activeTab) && (
                  <button onClick={() => {
