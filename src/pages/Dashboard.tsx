@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useSiteContext } from '../context/SiteContext';
 import { SITE_CONFIG as DEFAULT_CONFIG, PROJECTS as DEFAULT_PROJECTS, TIMELINE as DEFAULT_TIMELINE, COMPETENCIES as DEFAULT_COMPETENCIES } from '../constants';
 import { DASHBOARD_I18N } from '../dashboard_i18n';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { 
   Settings, Users, FolderKanban, FileText, Download, Trash, AlertTriangle,
-  Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil
+  Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil, GripVertical
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
 import { db, storage } from '../firebase';
@@ -491,28 +491,37 @@ export const Dashboard = () => {
                   <Plus size={14} /> {t.btn_add_entry}
                 </button>
               }>
-                <div className="space-y-3">
-                  {timeline.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-5 sketchy-border bg-ink/5 hover:bg-ink/10 transition-all group">
-                      <div>
-                        <h4 className="font-bold sketch-font text-lg">{typeof item.role === 'object' ? (item.role as any)[lang] : item.role}</h4>
-                        <p className="text-[10px] uppercase font-black opacity-60 mt-1">
-                          {typeof item.company === 'object' ? (item.company as any)[lang] : item.company}
-                          {' · '}
-                          {typeof item.year === 'object' ? (item.year as any)[lang] : item.year}
-                        </p>
+                <Reorder.Group axis="y" values={timeline} onReorder={updateTimeline} className="space-y-3">
+                  {timeline.map((item, i) => {
+                    const uniqueKey = typeof item.company === 'object' 
+                      ? ((item.company as any).en || '') + ((item.role as any).en || '') + ((item.year as any).en || '')
+                      : String(item.company) + String(item.role) + String(item.year);
+                    return (
+                    <Reorder.Item key={uniqueKey} value={item} className="flex items-center justify-between p-5 sketchy-border bg-ink/5 hover:bg-ink/10 transition-all group cursor-grab active:cursor-grabbing relative">
+                      <div className="flex items-center gap-4">
+                        <div className="opacity-30 group-hover:opacity-100 transition-opacity">
+                          <GripVertical size={16} />
+                        </div>
+                        <div>
+                          <h4 className="font-bold sketch-font text-lg">{typeof item.role === 'object' ? (item.role as any)[lang] : item.role}</h4>
+                          <p className="text-[10px] uppercase font-black opacity-60 mt-1">
+                            {typeof item.company === 'object' ? (item.company as any)[lang] : item.company}
+                            {' · '}
+                            {typeof item.year === 'object' ? (item.year as any)[lang] : item.year}
+                          </p>
+                        </div>
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => { setCurrentTimeline(item); setIsEditingTimeline(true); }} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
+                        <button onPointerDown={(e) => e.stopPropagation()} onClick={() => { setCurrentTimeline(item); setIsEditingTimeline(true); }} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
                           <Pencil size={14} />
                         </button>
-                        <button onClick={() => deleteTimeline(item)} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
+                        <button onPointerDown={(e) => e.stopPropagation()} onClick={() => deleteTimeline(item)} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
                           <Trash2 size={14} />
                         </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    </Reorder.Item>
+                  )})}
+                </Reorder.Group>
               </SketchyCard>
 
               <SketchyCard title={t.title_skills} subtitle={`${competencies.length} ${t.subtitle_skills}`} headerAction={
