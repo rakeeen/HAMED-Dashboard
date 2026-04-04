@@ -56,14 +56,24 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.siteConfig) setSiteConfig(data.siteConfig);
-        if (data.projects) setProjects(data.projects);
-        if (data.timeline) setTimeline(data.timeline);
-        if (data.competencies) setCompetencies(data.competencies);
         if (data.settings) setSettings(data.settings);
+        
+        // Anti-Race Condition: Only sync projects/resume if we don't have local pending edits
+        if (!hasUnpublishedChangesRef.current) {
+          if (data.projects) setProjects(data.projects);
+          if (data.timeline) setTimeline(data.timeline);
+          if (data.competencies) setCompetencies(data.competencies);
+        }
       }
     });
     return () => unsub();
   }, []);
+
+  // Update a ref to keep track of hasUnpublishedChanges inside the hook
+  const hasUnpublishedChangesRef = React.useRef(hasUnpublishedChanges);
+  useEffect(() => {
+    hasUnpublishedChangesRef.current = hasUnpublishedChanges;
+  }, [hasUnpublishedChanges]);
 
   // Debounced Auto-save for Site Config & Settings
   useEffect(() => {
@@ -73,7 +83,8 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
         const docRef = doc(db, 'content', 'main');
         await setDoc(docRef, { 
           siteConfig, 
-          settings 
+          settings,
+          updatedAt: new Date().toISOString()
         }, { merge: true });
       } catch (err) {
         console.error('Auto-save failed:', err);
@@ -111,12 +122,12 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
       await setDoc(docRef, { 
         projects, 
         timeline, 
-        competencies 
+        competencies,
+        lastPublishedAt: new Date().toISOString()
       }, { merge: true });
       setHasUnpublishedChanges(false);
     } catch (err) {
       console.error('Publish failed:', err);
-      alert('Failed to publish changes. Check your connection.');
     } finally {
       setIsSyncing(false);
     }

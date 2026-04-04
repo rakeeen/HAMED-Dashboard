@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
 import { db, storage } from '../firebase';
-import { doc, setDoc, collection, query, orderBy, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, query, orderBy, onSnapshot, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 import { MascotFace } from '../components/ui/MascotFace';
@@ -107,6 +107,25 @@ export const Dashboard = () => {
             deleteDoc(doc(db, 'inquiries', inq.id)).catch(console.error);
           });
         } catch(e: any) {
+          setAlertMessage(e.message);
+        }
+      }
+    });
+  };
+  const resetAnalytics = async () => {
+    setConfirmDialog({
+      title: isRTL ? 'تصفير العداد' : "Reset Analytics",
+      desc: isRTL ? 'هل أنت متأكد من تصفير عداد الزوار؟ سيتم حذف جميع البيانات الإحصائية.' : "Are you sure you want to reset all visitor data? This will zero out all current analytics counters.",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          await setDoc(doc(db, 'analytics', 'main'), {
+            visitors: 0,
+            totalVisits: 0,
+            uniqueVisitors: 0,
+            lastReset: serverTimestamp()
+          }, { merge: true });
+        } catch (e: any) {
           setAlertMessage(e.message);
         }
       }
@@ -261,6 +280,15 @@ export const Dashboard = () => {
           {/* Analytics & Leads Tab */}
           {activeTab === 'analytics' && (
             <div className="space-y-12">
+              <div className="flex justify-end pr-4">
+                 <button 
+                  onClick={resetAnalytics}
+                  className="sketchy-border border-ink/10 px-4 py-2 text-[9px] uppercase tracking-widest font-black opacity-50 hover:opacity-100 hover:border-rust hover:text-rust transition-all flex items-center gap-2"
+                 >
+                   <Trash size={12} />
+                   {isRTL ? 'تصفير كافة الإحصائيات' : 'Reset All Counters'}
+                 </button>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                 <SketchyCard title="" subtitle="" className="min-h-[200px] flex flex-col justify-between p-8 bg-paper transition-transform hover:scale-[1.01] shadow-sm">
                   <div className="space-y-1">
