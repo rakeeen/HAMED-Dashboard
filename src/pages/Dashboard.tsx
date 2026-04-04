@@ -50,6 +50,7 @@ export const Dashboard = () => {
 
   const [isEditingCompetency, setIsEditingCompetency] = useState(false);
   const [currentCompetency, setCurrentCompetency] = useState<Partial<Competency> | null>(null);
+  const [currentCompetencyIndex, setCurrentCompetencyIndex] = useState<number | null>(null);
 
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState({ visitors: 0, totalVisits: 0, uniqueVisitors: 0, inquiries: 0 });
@@ -179,23 +180,23 @@ export const Dashboard = () => {
 
   const saveCompetency = () => {
     if (!currentCompetency?.title) return;
-    const index = competencies.findIndex(c => c.title === currentCompetency.title);
-    if (index >= 0) {
+    if (currentCompetencyIndex !== null && currentCompetencyIndex >= 0) {
       const newC = [...competencies];
-      newC[index] = currentCompetency as Competency;
+      newC[currentCompetencyIndex] = currentCompetency as Competency;
       updateCompetencies(newC);
     } else {
       updateCompetencies([...competencies, currentCompetency as Competency]);
     }
     setIsEditingCompetency(false);
+    setCurrentCompetencyIndex(null);
   };
 
-  const deleteCompetency = (title: string) => {
+  const deleteCompetency = (index: number) => {
     setConfirmDialog({
       title: isRTL ? 'حذف المهارة' : "Delete Competency",
       desc: isRTL ? 'هل أنت متأكد من حذف هذه المهارة؟' : "Are you sure you want to delete this competency?",
       onConfirm: () => {
-        updateCompetencies(competencies.filter(c => c.title !== title));
+        updateCompetencies(competencies.filter((_, i) => i !== index));
         setConfirmDialog(null);
       }
     });
@@ -537,10 +538,10 @@ export const Dashboard = () => {
                         <p className="text-[9px] uppercase opacity-60 font-black mt-1">{comp.icon}</p>
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => { setCurrentCompetency(comp); setIsEditingCompetency(true); }} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
+                        <button onClick={() => { setCurrentCompetency(comp); setCurrentCompetencyIndex(i); setIsEditingCompetency(true); }} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
                           <Pencil size={14} />
                         </button>
-                        <button onClick={() => deleteCompetency(typeof comp.title === 'object' ? (comp.title as any).en : comp.title as string)} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
+                        <button onClick={() => deleteCompetency(i)} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
                           <Trash2 size={14} />
                         </button>
                       </div>

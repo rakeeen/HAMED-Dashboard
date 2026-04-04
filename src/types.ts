@@ -47,6 +47,7 @@ export interface TimelineItem {
 }
 
 export interface Competency {
+  id: string;
   title: LocalizedField;
   description: LocalizedField;
   icon: string;
