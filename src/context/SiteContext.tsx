@@ -49,14 +49,18 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false);
 
+  // Avoid overwriting active typing with incoming network snapshots
+  const pendingConfigSaveRef = React.useRef(false);
+
   // Initial Load from Firestore
   useEffect(() => {
     const docRef = doc(db, 'content', 'main');
     const unsub = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        if (data.siteConfig) setSiteConfig(data.siteConfig);
-        if (data.settings) setSettings(data.settings);
+        
+        if (data.siteConfig && !pendingConfigSaveRef.current) setSiteConfig(data.siteConfig);
+        if (data.settings && !pendingConfigSaveRef.current) setSettings(data.settings);
         
         // Anti-Race Condition: Only sync projects/resume if we don't have local pending edits
         if (!hasUnpublishedChangesRef.current) {
@@ -77,6 +81,8 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
 
   // Debounced Auto-save for Site Config & Settings
   useEffect(() => {
+    if (!pendingConfigSaveRef.current) return; // Only autosave if we made a LOCAL change
+
     const timer = setTimeout(async () => {
       setIsSyncing(true);
       try {
@@ -86,6 +92,9 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
           settings,
           updatedAt: new Date().toISOString()
         }, { merge: true });
+        
+        // Reset the protection ONLY after a successful roundtrip
+        setTimeout(() => { pendingConfigSaveRef.current = false; }, 500);
       } catch (err) {
         console.error('Auto-save failed:', err);
       } finally {
@@ -96,7 +105,10 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(timer);
   }, [siteConfig, settings]);
 
-  const updateConfig = (config: Partial<typeof DEFAULT_CONFIG>) => setSiteConfig(prev => ({ ...prev, ...config }));
+  const updateConfig = (config: Partial<typeof DEFAULT_CONFIG>) => {
+    pendingConfigSaveRef.current = true;
+    setSiteConfig(prev => ({ ...prev, ...config }));
+  };
   
   const updateProjects = (newProjects: Project[]) => {
     setProjects(newProjects);
@@ -113,7 +125,10 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     setHasUnpublishedChanges(true);
   };
   
-  const updateSettings = (newSettings: Partial<UISettings>) => setSettings(prev => ({ ...prev, ...newSettings }));
+  const updateSettings = (newSettings: Partial<UISettings>) => {
+    pendingConfigSaveRef.current = true;
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  };
   
   const publishContent = async () => {
     setIsSyncing(true);
