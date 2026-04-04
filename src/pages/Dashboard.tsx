@@ -21,7 +21,7 @@ import { LocalizedInput, LocalizedTextarea, ImageInput } from '../components/das
 import { CustomCursor } from '../components/ui/CustomCursor';
 import { RollingNumber } from '../components/ui/RollingNumber';
 
-type DashboardTab = 'analytics' | 'branding' | 'projects' | 'resume' | 'settings';
+type DashboardTab = 'analytics' | 'branding' | 'projects' | 'resume' | 'contact' | 'settings';
 type DashboardLang = 'en' | 'ar' | 'it';
 
 export const Dashboard = () => {
@@ -207,6 +207,7 @@ export const Dashboard = () => {
     { id: 'branding', label: t.nav_branding, icon: FileText },
     { id: 'projects', label: t.nav_projects, icon: FolderKanban },
     { id: 'resume', label: t.nav_experience, icon: Briefcase },
+    { id: 'contact', label: isRTL ? 'فورم التواصل' : 'Contact Form', icon: Globe },
     { id: 'settings', label: t.nav_settings, icon: Settings },
   ];
 
@@ -559,6 +560,65 @@ export const Dashboard = () => {
               )}
             </div>
           )}
+
+          {/* Contact Form Tab */}
+          {activeTab === 'contact' && (() => {
+            const cf = (siteConfig as any).contactForm || {};
+            const updateCF = (patch: any) => updateConfig({ contactForm: { ...cf, ...patch } } as any);
+            return (
+            <div className="space-y-10">
+              <SketchyCard title={isRTL ? 'إعدادات فورم التواصل' : 'Contact Form Settings'} subtitle={isRTL ? 'تحكم في كل نص ومحتوى فورم الاتصال' : 'Control every text and field in the contact form'}>
+                <div className="space-y-6">
+                  {/* Enable / Disable Toggle */}
+                  <div className="flex items-center justify-between p-4 bg-ink/5 sketchy-border">
+                    <div>
+                      <h4 className="font-bold text-sm uppercase tracking-widest">{isRTL ? 'حالة الفورم' : 'Form Status'}</h4>
+                      <p className="text-[9px] opacity-70 font-black uppercase mt-1">{isRTL ? 'تفعيل أو تعطيل الفورم على الموقع' : 'Enable or disable the form on the live site'}</p>
+                    </div>
+                    <button
+                      onClick={() => updateCF({ enabled: !cf.enabled })}
+                      className={`px-6 py-2 sketchy-border font-black text-[10px] uppercase tracking-widest transition-all ${cf.enabled !== false ? 'bg-ink text-paper' : 'opacity-50'}`}
+                    >
+                      {cf.enabled !== false ? (isRTL ? 'مفعّل ✓' : 'Enabled ✓') : (isRTL ? 'معطّل' : 'Disabled')}
+                    </button>
+                  </div>
+                </div>
+              </SketchyCard>
+
+              <SketchyCard title={isRTL ? 'العناوين الرئيسية' : 'Main Headings'} subtitle={isRTL ? 'عنوان ووصف الفورم' : 'Form title and subtitle'}>
+                <div className="space-y-8">
+                  <LocalizedInput label={isRTL ? 'العنوان الرئيسي' : 'Main Heading'} value={cf.heading || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ heading: val })} />
+                  <LocalizedInput label={isRTL ? 'العنوان الفرعي' : 'Subtitle'} value={cf.subtitle || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ subtitle: val })} />
+                  <LocalizedInput label={isRTL ? 'وقت الاستجابة (أسفل الزرار)' : 'Response Time (below send btn)'} value={cf.responseTime || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ responseTime: val })} />
+                </div>
+              </SketchyCard>
+
+              <SketchyCard title={isRTL ? 'لابيلات الحقول' : 'Field Labels'} subtitle={isRTL ? 'نص اللابيل فوق كل حقل' : 'The label text above each input field'}>
+                <div className="space-y-8">
+                  <LocalizedInput label={isRTL ? 'لابيل الاسم' : 'Name Label'} value={cf.labelName || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ labelName: val })} />
+                  <LocalizedInput label={isRTL ? 'لابيل الإيميل' : 'Email Label'} value={cf.labelEmail || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ labelEmail: val })} />
+                  <LocalizedInput label={isRTL ? 'لابيل الرسالة' : 'Message Label'} value={cf.labelMessage || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ labelMessage: val })} />
+                </div>
+              </SketchyCard>
+
+              <SketchyCard title={isRTL ? 'البلاسيهولدرز' : 'Placeholders'} subtitle={isRTL ? 'النص اللي بيظهر جوا الحقول قبل ما يكتبوا' : 'Hint text shown inside each input before typing'}>
+                <div className="space-y-8">
+                  <LocalizedInput label={isRTL ? 'بلاسيهولدر الاسم' : 'Name Placeholder'} value={cf.placeholderName || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ placeholderName: val })} />
+                  <LocalizedInput label={isRTL ? 'بلاسيهولدر الإيميل' : 'Email Placeholder'} value={cf.placeholderEmail || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ placeholderEmail: val })} />
+                  <LocalizedInput label={isRTL ? 'بلاسيهولدر الرسالة' : 'Message Placeholder'} value={cf.placeholderMessage || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ placeholderMessage: val })} />
+                </div>
+              </SketchyCard>
+
+              <SketchyCard title={isRTL ? 'زرار الإرسال ورسالة النجاح' : 'Send Button & Success Message'} subtitle={isRTL ? 'ما بيظهر على الزرار وبعد الإرسال' : 'What appears on the button and after submission'}>
+                <div className="space-y-8">
+                  <LocalizedInput label={isRTL ? 'نص الزرار' : 'Button Text'} value={cf.btnText || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ btnText: val })} />
+                  <LocalizedInput label={isRTL ? 'عنوان رسالة النجاح' : 'Success Heading'} value={cf.successHeading || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ successHeading: val })} />
+                  <LocalizedInput label={isRTL ? 'نص رسالة النجاح' : 'Success Body Text'} value={cf.successBody || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ successBody: val })} />
+                </div>
+              </SketchyCard>
+            </div>
+            );
+          })()}
 
           {/* Settings Tab */}
           {activeTab === 'settings' && (

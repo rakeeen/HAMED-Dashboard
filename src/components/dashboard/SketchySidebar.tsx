@@ -9,7 +9,8 @@ import {
   LogOut, 
   Cloud,
   Sun,
-  Moon
+  Moon,
+  Mail
 } from 'lucide-react';
 import { useSiteContext } from '../../context/SiteContext';
 import { DASHBOARD_I18N } from '../../dashboard_i18n';
@@ -31,6 +32,7 @@ export const SketchySidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab
     { id: 'branding', label: t.nav_branding, icon: Palette },
     { id: 'projects', label: t.nav_projects, icon: Briefcase },
     { id: 'resume', label: t.nav_experience, icon: FileText },
+    { id: 'contact', label: lang === 'ar' ? 'فورم التواصل' : lang === 'it' ? 'Form Contatto' : 'Contact Form', icon: Mail },
     { id: 'settings', label: t.nav_settings, icon: Settings },
   ];
 
