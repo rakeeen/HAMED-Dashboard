@@ -64,8 +64,10 @@
     font-family: var(--font-arabic) !important;
   }
 
-  * {
-    cursor: none !important;
+  @media (min-width: 768px) {
+    * {
+      cursor: none !important;
+    }
   }
 
   ::selection {
