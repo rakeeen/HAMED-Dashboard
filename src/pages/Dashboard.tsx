@@ -616,9 +616,71 @@ export const Dashboard = () => {
                   <LocalizedInput label={isRTL ? 'نص رسالة النجاح' : 'Success Body Text'} value={cf.successBody || {en:'', ar:'', it:''}} onChange={(val: any) => updateCF({ successBody: val })} />
                 </div>
               </SketchyCard>
+
+              {/* Extra Info Items */}
+              <SketchyCard
+                title={isRTL ? 'معلومات إضافية' : 'Extra Contact Info'}
+                subtitle={isRTL ? 'رقم هاتف، عنوان، رابط — أي معلومة اضافية تحت الفورم' : 'Phone, address, link — any extra info shown below the form'}
+                headerAction={
+                  <button
+                    onClick={() => {
+                      const items = cf.extraInfo || [];
+                      updateCF({ extraInfo: [...items, { label: { en: '', ar: '', it: '' }, value: '', type: 'text' }] });
+                    }}
+                    className="flex items-center gap-2 text-[10px] uppercase font-black px-4 py-2 sketchy-border hover:bg-sepia/10 transition-all"
+                  >
+                    <Plus size={14} /> {isRTL ? 'إضافة عنصر' : 'Add Item'}
+                  </button>
+                }
+              >
+                <div className="space-y-6">
+                  {(cf.extraInfo || []).length === 0 && (
+                    <p className="text-center opacity-40 sketch-font text-lg py-8">{isRTL ? 'لا توجد عناصر مضافة بعد' : 'No items yet — click Add Item'}</p>
+                  )}
+                  {(cf.extraInfo || []).map((item: any, idx: number) => {
+                    const updateItem = (patch: any) => {
+                      const items = [...(cf.extraInfo || [])];
+                      items[idx] = { ...items[idx], ...patch };
+                      updateCF({ extraInfo: items });
+                    };
+                    const removeItem = () => {
+                      const items = (cf.extraInfo || []).filter((_: any, i: number) => i !== idx);
+                      updateCF({ extraInfo: items });
+                    };
+                    return (
+                      <div key={idx} className="p-5 sketchy-border bg-ink/5 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] uppercase font-black opacity-60">#{idx + 1} — {isRTL ? 'عنصر' : 'Item'}</span>
+                          <div className="flex items-center gap-3">
+                            <select
+                              value={item.type || 'text'}
+                              onChange={(e) => updateItem({ type: e.target.value })}
+                              className="text-[10px] uppercase font-black px-3 py-1 sketchy-border bg-transparent cursor-pointer"
+                            >
+                              <option value="text">{isRTL ? 'نص' : 'Text'}</option>
+                              <option value="phone">{isRTL ? 'هاتف' : 'Phone'}</option>
+                              <option value="link">{isRTL ? 'رابط' : 'Link'}</option>
+                            </select>
+                            <button onClick={removeItem} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <LocalizedInput label={isRTL ? 'اللابيل (الاسم)' : 'Label / Name'} value={item.label || {en:'', ar:'', it:''}} onChange={(val: any) => updateItem({ label: val })} />
+                        <SketchyInput
+                          label={isRTL ? 'القيمة (الرقم أو النص)' : 'Value (number or text)'}
+                          value={item.value || ''}
+                          onChange={(e) => updateItem({ value: e.target.value })}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </SketchyCard>
             </div>
             );
           })()}
+
 
           {/* Settings Tab */}
           {activeTab === 'settings' && (
