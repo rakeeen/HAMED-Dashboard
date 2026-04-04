@@ -392,6 +392,11 @@ export const Dashboard = () => {
                     <LocalizedInput label={t.label_site_name} value={siteConfig.name} onChange={(val: any) => updateConfig({ name: val })} />
                     <LocalizedInput label={t.label_site_role} value={siteConfig.role} onChange={(val: any) => updateConfig({ role: val })} />
                     <LocalizedTextarea label={t.label_site_summary} value={siteConfig.summary} onChange={(val: any) => updateConfig({ summary: val })} />
+                    <LocalizedInput label={(t as any).label_hero_giant} value={(siteConfig as any).heroGiantText || {en:'', ar:'', it:''}} onChange={(val: any) => updateConfig({ heroGiantText: val })} />
+                    <div className="grid grid-cols-2 gap-4">
+                       <LocalizedInput label={(t as any).label_btn1} value={(siteConfig as any).button1Text || {en:'', ar:'', it:''}} onChange={(val: any) => updateConfig({ button1Text: val })} />
+                       <LocalizedInput label={(t as any).label_btn2} value={(siteConfig as any).button2Text || {en:'', ar:'', it:''}} onChange={(val: any) => updateConfig({ button2Text: val })} />
+                    </div>
                  </div>
               </SketchyCard>
 
@@ -413,17 +418,11 @@ export const Dashboard = () => {
               </div>
 
               <SketchyCard title={t.title_assets} subtitle={t.subtitle_assets}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="grid grid-cols-1 gap-10">
                    <ImageInput 
                     label={t.label_about_portrait} 
                     value={siteConfig.siteImages?.aboutPortrait || ''} 
                     onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, aboutPortrait: e.target.value }})} 
-                    onError={setAlertMessage}
-                   />
-                   <ImageInput 
-                    label={t.label_contact_bg} 
-                    value={siteConfig.siteImages?.contactBackground || ''} 
-                    onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, contactBackground: e.target.value }})} 
                     onError={setAlertMessage}
                    />
                 </div>
@@ -669,6 +668,7 @@ export const Dashboard = () => {
                   <LocalizedInput label={isRTL ? 'المسمى الوظيفي' : "Role Title"} value={currentTimeline.role} onChange={(val: any) => setCurrentTimeline({...currentTimeline, role: val})} />
                   <LocalizedInput label={isRTL ? 'الشركة / الجهة' : "Entity Name"} value={currentTimeline.company} onChange={(val: any) => setCurrentTimeline({...currentTimeline, company: val})} />
                   <LocalizedInput label={isRTL ? 'المدة' : "Duration"} value={currentTimeline.year} onChange={(val: any) => setCurrentTimeline({...currentTimeline, year: val})} />
+                  <LocalizedTextarea label={(t as any).label_timeline_desc} value={currentTimeline.description || {en:'', ar:'', it:''}} onChange={(val: any) => setCurrentTimeline({...currentTimeline, description: val})} />
                 <div className="flex gap-4">
                   <button onClick={() => setIsEditingTimeline(false)} className="flex-1 py-3 sketchy-border font-black uppercase text-xs hover:bg-white/5">{isRTL ? 'إلغاء' : 'Cancel'}</button>
                   <button onClick={saveTimeline} className="sketchy-btn filled flex-[2] py-3 text-lg font-black uppercase">{t.btn_update}</button>

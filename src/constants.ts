@@ -19,6 +19,21 @@ export const SITE_CONFIG = {
     ar: '',
     it: ''
   },
+  heroGiantText: {
+    en: '',
+    ar: '',
+    it: ''
+  },
+  button1Text: {
+    en: '',
+    ar: '',
+    it: ''
+  },
+  button2Text: {
+    en: '',
+    ar: '',
+    it: ''
+  },
   socials: {
     x: 'https://x.com/Rakeeeeeeen',
     linkedin: 'https://www.linkedin.com/in/rakeeen/',

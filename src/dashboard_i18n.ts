@@ -19,6 +19,9 @@ export const DASHBOARD_I18N = {
     label_site_name: 'Site Display Name',
     label_site_role: 'Professional Role',
     label_site_summary: 'Hero Summary',
+    label_hero_giant: 'Giant Hero Text',
+    label_btn1: 'Primary Button',
+    label_btn2: 'Secondary Button',
     
     title_contact: 'Contact Metadata',
     subtitle_contact: 'Business contact points',
@@ -29,9 +32,8 @@ export const DASHBOARD_I18N = {
     subtitle_social: 'External platform handles',
     
     title_assets: 'Visual Assets',
-    subtitle_assets: 'Core imagery and portraits',
-    label_about_portrait: 'About Portrait',
-    label_contact_bg: 'Contact Background',
+    subtitle_assets: 'Core imagery',
+    label_about_portrait: 'Who is Hamed Image',
     
     title_portfolio: 'Portfolio Projects',
     subtitle_projects: 'case studies',
@@ -39,6 +41,7 @@ export const DASHBOARD_I18N = {
     
     title_timeline: 'Career Timeline',
     subtitle_timeline: 'experience entries',
+    label_timeline_desc: 'Job Description',
     title_skills: 'Skills & Competencies',
     subtitle_skills: 'skill areas',
     btn_add_entry: 'Add Entry',
@@ -94,6 +97,9 @@ export const DASHBOARD_I18N = {
     label_site_name: 'اسم العرض في الموقع',
     label_site_role: 'المسمى الوظيفي',
     label_site_summary: 'نبذة التعريف',
+    label_hero_giant: 'كلمة الهيرو الكبيرة',
+    label_btn1: 'اسم الزر الأساسي',
+    label_btn2: 'اسم الزر الثانوي',
     
     title_contact: 'بيانات التواصل',
     subtitle_contact: 'نقاط الاتصال بالأعمال',
@@ -104,9 +110,8 @@ export const DASHBOARD_I18N = {
     subtitle_social: 'روابط المنصات الخارجية',
     
     title_assets: 'الأصول المرئية',
-    subtitle_assets: 'الصور الشخصية والخلفيات',
-    label_about_portrait: 'صورة النبذة',
-    label_contact_bg: 'خلفية التواصل',
+    subtitle_assets: 'الصور الشخصية',
+    label_about_portrait: 'صورة صفحة من هو حامد',
     
     title_portfolio: 'مشاريع المعرض',
     subtitle_projects: 'دراسات حالة',
@@ -114,6 +119,7 @@ export const DASHBOARD_I18N = {
     
     title_timeline: 'المسار المهني',
     subtitle_timeline: 'خبرات عملية',
+    label_timeline_desc: 'وصف الوظيفة',
     title_skills: 'المهارات والخبرات',
     subtitle_skills: 'مجالات التميز',
     btn_add_entry: 'إضافة خبرة',
@@ -169,6 +175,9 @@ export const DASHBOARD_I18N = {
     label_site_name: 'Nome Visualizzato del Sito',
     label_site_role: 'Ruolo Professionale',
     label_site_summary: 'Sommario Hero',
+    label_hero_giant: 'Testo Hero Gigante',
+    label_btn1: 'Pulsante Primario',
+    label_btn2: 'Pulsante Secondario',
     
     title_contact: 'Metadati di Contatto',
     subtitle_contact: 'Punti di contatto aziendali',
@@ -179,9 +188,8 @@ export const DASHBOARD_I18N = {
     subtitle_social: 'Link alle piattaforme esterne',
     
     title_assets: 'Asset Visivi',
-    subtitle_assets: 'Immagini e ritratti core',
-    label_about_portrait: 'Ritratto About',
-    label_contact_bg: 'Sfondo Contatto',
+    subtitle_assets: 'Immagini core',
+    label_about_portrait: 'Immagine Chi è Hamed',
     
     title_portfolio: 'Progetti Portfolio',
     subtitle_projects: 'casi di studio',
@@ -189,6 +197,7 @@ export const DASHBOARD_I18N = {
     
     title_timeline: 'Linea Temporale Carriera',
     subtitle_timeline: 'voci di esperienza',
+    label_timeline_desc: 'Descrizione del Lavoro',
     title_skills: 'Abilità e Competenze',
     subtitle_skills: 'aree di competenza',
     btn_add_entry: 'Aggiungi Voce',
