@@ -52,7 +52,7 @@ export const Dashboard = () => {
   const [currentCompetency, setCurrentCompetency] = useState<Partial<Competency> | null>(null);
 
   const [inquiries, setInquiries] = useState<any[]>([]);
-  const [analytics, setAnalytics] = useState({ visitors: 0, inquiries: 0 });
+  const [analytics, setAnalytics] = useState({ visitors: 0, totalVisits: 0, uniqueVisitors: 0, inquiries: 0 });
   const [currentInquiry, setCurrentInquiry] = useState<any>(null);
 
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -240,26 +240,44 @@ export const Dashboard = () => {
           {/* Analytics & Leads Tab */}
           {activeTab === 'analytics' && (
             <div className="space-y-12">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <SketchyCard title="" subtitle="" className="min-h-[220px] flex flex-col justify-between p-8 bg-paper transition-transform hover:scale-[1.01] shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                <SketchyCard title="" subtitle="" className="min-h-[200px] flex flex-col justify-between p-8 bg-paper transition-transform hover:scale-[1.01] shadow-sm">
                   <div className="space-y-1">
-                    <h3 className="text-[10px] uppercase tracking-[0.25em] font-black text-ink/30">{isRTL ? 'إجمالي الزوار' : 'Inbound Visitors'}</h3>
+                    <h3 className="text-[10px] uppercase tracking-[0.25em] font-black text-ink/30">{isRTL ? 'زوار جدد (Unique)' : 'Unique People'}</h3>
                     <div className="w-6 h-[2px] bg-sepia/20" />
                   </div>
                   
                   <div className="flex items-start my-4">
-                    <RollingNumber value={analytics.visitors} fontSize="text-6xl" className="tracking-tighter" />
+                    <RollingNumber value={analytics.uniqueVisitors || analytics.visitors} fontSize="text-6xl" className="tracking-tighter" />
+                  </div>
+
+                  <div className="flex items-center gap-3 opacity-50 mt-6 pt-4 border-t border-ink/5">
+                    <Star size={12} className="text-sepia" />
+                    <span className="text-[9px] uppercase tracking-widest font-bold">
+                       {isRTL ? 'أشخاص حقيقيون دخلوا الموقع' : 'Individual humans reached'}
+                    </span>
+                  </div>
+                </SketchyCard>
+
+                <SketchyCard title="" subtitle="" className="min-h-[200px] flex flex-col justify-between p-8 bg-paper transition-transform hover:scale-[1.01] shadow-sm">
+                  <div className="space-y-1">
+                    <h3 className="text-[10px] uppercase tracking-[0.25em] font-black text-ink/30">{isRTL ? 'إجمالي الدخول (Total)' : 'Total Sessions'}</h3>
+                    <div className="w-6 h-[2px] bg-sepia/20" />
+                  </div>
+                  
+                  <div className="flex items-start my-4">
+                    <RollingNumber value={analytics.totalVisits || analytics.visitors} fontSize="text-6xl" className="tracking-tighter" />
                   </div>
 
                   <div className="flex items-center gap-3 opacity-50 mt-6 pt-4 border-t border-ink/5">
                     <Users size={12} />
                     <span className="text-[9px] uppercase tracking-widest font-bold">
-                       {t.subtitle_analytics}
+                       {isRTL ? 'إجمالي عدد مرات فتح الرابط' : 'Total Raw Site Impressions'}
                     </span>
                   </div>
                 </SketchyCard>
                 
-                <SketchyCard title="" subtitle="" className="min-h-[220px] flex flex-col justify-between p-8 bg-paper transition-transform hover:scale-[1.01] shadow-sm">
+                <SketchyCard title="" subtitle="" className="min-h-[200px] flex flex-col justify-between p-8 bg-paper transition-transform hover:scale-[1.01] shadow-sm">
                    <div className="space-y-1">
                     <h3 className="text-[10px] uppercase tracking-[0.25em] font-black text-ink/30">{isRTL ? 'طلبات العملاء' : 'Client Inquiries'}</h3>
                     <div className="w-6 h-[2px] bg-sepia/20" />
