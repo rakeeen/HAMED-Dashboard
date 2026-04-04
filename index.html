@@ -14,9 +14,22 @@
     href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght,grad,xtra,xopq,yopq,ytlc,fidl@8..144,25..151,100..1000,0,468,79,185,423,500,0&display=swap"
     rel="stylesheet">
   <title>HAMED</title>
-  <script type="module" crossorigin src="/HAMED-Dashboard/assets/index-DMJUg51j.js"></script>
-  <link rel="stylesheet" crossorigin href="/HAMED-Dashboard/assets/index-MMa55lJ1.css">
-</head>
+  <script type="module" crossorigin src="/HAMED-Dashboard/assets/index-CvJUFofL.js"></script>
+  <link rel="stylesheet" crossorigin href="/HAMED-Dashboard/assets/index-B9tHcprL.css">
+<script>
+          fetch('/HAMED-Dashboard/version.json?t=' + new Date().getTime())
+            .then(res => res.json())
+            .then(data => {
+              var currentVer = data.version;
+              var savedVer = localStorage.getItem("dashboard_version");
+              if (savedVer && savedVer !== currentVer) {
+                localStorage.setItem("dashboard_version", currentVer);
+                location.reload();
+              } else {
+                localStorage.setItem("dashboard_version", currentVer);
+              }
+            }).catch(e => console.log('v-error'));
+        </script></head>
 
 <body>
   <div id="root"></div>
