@@ -5,6 +5,9 @@ import { Login } from './pages/Login';
 import { SiteProvider, useSiteContext } from './context/SiteContext';
 import { CustomCursor } from './components/ui/CustomCursor';
 
+/** TEMP: set to `false` to require login again */
+const AUTH_DISABLED = true;
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -14,6 +17,9 @@ const ScrollToTop = () => {
 };
 
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  if (AUTH_DISABLED) {
+    return <>{children}</>;
+  }
   const isAuth = localStorage.getItem('hamed_admin_auth') === 'true' || sessionStorage.getItem('hamed_admin_auth') === 'true';
   if (!isAuth) {
     return <Navigate to="/login" replace />;

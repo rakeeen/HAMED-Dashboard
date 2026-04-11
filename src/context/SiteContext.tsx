@@ -59,11 +59,18 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         
-        if (data.siteConfig && !pendingConfigSaveRef.current) setSiteConfig(data.siteConfig);
-        if (data.settings && !pendingConfigSaveRef.current) setSettings(data.settings);
-        
-        // Anti-Race Condition: Only sync projects/resume if we don't have local pending edits
+        // Anti-Race Condition: Only sync if we don't have local pending edits
         if (!hasUnpublishedChangesRef.current) {
+          if (data.siteConfig) {
+            setSiteConfig({
+              ...DEFAULT_CONFIG,
+              ...data.siteConfig,
+              contactForm: { ...(DEFAULT_CONFIG.contactForm || {}), ...(data.siteConfig.contactForm || {}) },
+              socials: { ...(DEFAULT_CONFIG.socials || {}), ...(data.siteConfig.socials || {}) },
+              siteImages: { ...(DEFAULT_CONFIG.siteImages || {}), ...(data.siteConfig.siteImages || {}) }
+            });
+          }
+          if (data.settings) setSettings(data.settings);
           if (data.projects) setProjects(data.projects);
           if (data.timeline) setTimeline(data.timeline);
           if (data.competencies) setCompetencies(data.competencies);
@@ -79,35 +86,13 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     hasUnpublishedChangesRef.current = hasUnpublishedChanges;
   }, [hasUnpublishedChanges]);
 
-  // Debounced Auto-save for Site Config & Settings
-  useEffect(() => {
-    if (!pendingConfigSaveRef.current) return; // Only autosave if we made a LOCAL change
-
-    const timer = setTimeout(async () => {
-      setIsSyncing(true);
-      try {
-        const docRef = doc(db, 'content', 'main');
-        await setDoc(docRef, { 
-          siteConfig, 
-          settings,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
-        
-        // Reset the protection ONLY after a successful roundtrip
-        setTimeout(() => { pendingConfigSaveRef.current = false; }, 500);
-      } catch (err) {
-        console.error('Auto-save failed:', err);
-      } finally {
-        setIsSyncing(false);
-      }
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [siteConfig, settings]);
-
   const updateConfig = (config: Partial<typeof DEFAULT_CONFIG>) => {
-    pendingConfigSaveRef.current = true;
-    setSiteConfig(prev => ({ ...prev, ...config }));
+    setSiteConfig(prev => ({ 
+      ...prev, 
+      ...config,
+      contactForm: config.contactForm ? { ...prev.contactForm, ...config.contactForm } : prev.contactForm
+    }));
+    setHasUnpublishedChanges(true);
   };
   
   const updateProjects = (newProjects: Project[]) => {
@@ -126,8 +111,8 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const updateSettings = (newSettings: Partial<UISettings>) => {
-    pendingConfigSaveRef.current = true;
     setSettings(prev => ({ ...prev, ...newSettings }));
+    setHasUnpublishedChanges(true);
   };
   
   const publishContent = async () => {
@@ -135,6 +120,8 @@ export const SiteProvider = ({ children }: { children: ReactNode }) => {
     try {
       const docRef = doc(db, 'content', 'main');
       await setDoc(docRef, { 
+        siteConfig,
+        settings,
         projects, 
         timeline, 
         competencies,

@@ -38,7 +38,7 @@ export const Dashboard = () => {
   const [lang, setLang] = useState<DashboardLang>('en');
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
-  const [adminEmail, setAdminEmail] = useState(localStorage.getItem('hamed_admin_email') || 'hamed@design.com');
+  const [adminEmail, setAdminEmail] = useState(localStorage.getItem('hamed_admin_email') || 'hamed.rakeeen@gmail.com');
   const [adminPass, setAdminPass] = useState(localStorage.getItem('hamed_admin_pass') || 'hamed2024');
 
   // Modals state
@@ -436,6 +436,14 @@ export const Dashboard = () => {
                    />
                 </div>
               </SketchyCard>
+              
+              {hasUnpublishedChanges && (
+                <div className="flex justify-end">
+                  <button onClick={publishContent} disabled={isSyncing} className="sketchy-btn filled px-10 py-3">
+                    {t.btn_push_live}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -677,6 +685,14 @@ export const Dashboard = () => {
                   })}
                 </div>
               </SketchyCard>
+              
+              {hasUnpublishedChanges && (
+                <div className="flex justify-end">
+                  <button onClick={publishContent} disabled={isSyncing} className="sketchy-btn filled px-10 py-3">
+                    {t.btn_push_live}
+                  </button>
+                </div>
+              )}
             </div>
             );
           })()}
@@ -731,6 +747,14 @@ export const Dashboard = () => {
                     </button>
                  </div>
               </SketchyCard>
+
+              {hasUnpublishedChanges && (
+                <div className="flex justify-end">
+                  <button onClick={publishContent} disabled={isSyncing} className="sketchy-btn filled px-10 py-3">
+                    {t.btn_push_live}
+                  </button>
+                </div>
+              )}
             </div>
           )}
             </motion.div>

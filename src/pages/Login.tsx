@@ -16,7 +16,7 @@ export const Login = () => {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
-      const whitelistedEmail = 'Hamed.rakeeen@gmail.com'.toLowerCase();
+      const whitelistedEmail = 'hamed.rakeeen@gmail.com';
       const userEmail = user.email?.toLowerCase();
 
       // Case-Insensitive Whitelist Check
