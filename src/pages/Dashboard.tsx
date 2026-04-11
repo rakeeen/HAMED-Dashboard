@@ -5,7 +5,7 @@ import { DASHBOARD_I18N } from '../dashboard_i18n';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { 
   Settings, Users, FolderKanban, FileText, Download, Trash, AlertTriangle,
-  Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil, GripVertical
+  Save, Plus, Trash2, Globe, Briefcase, Star, X, Pencil, GripVertical, Copy
 } from 'lucide-react';
 import { Project, TimelineItem, Competency } from '../types';
 import { db, storage } from '../firebase';
@@ -152,6 +152,18 @@ export const Dashboard = () => {
         setConfirmDialog(null);
       }
     });
+  };
+
+  const duplicateProject = (project: Project) => {
+     const newId = Date.now().toString();
+     const newProject = {
+       ...project,
+       id: newId,
+       title: typeof project.title === 'object' 
+         ? { ...project.title, [lang]: (project.title as any)[lang] + ' (Copy)' }
+         : project.title + ' (Copy)'
+     };
+     updateProjects([newProject, ...projects]);
   };
 
   const saveTimeline = () => {
@@ -431,6 +443,7 @@ export const Dashboard = () => {
                 <div className="grid grid-cols-1 gap-10">
                    <ImageInput 
                     label={t.label_about_portrait} 
+                    hint="800 × 1000 px — Portrait 4:5"
                     value={siteConfig.siteImages?.aboutPortrait || ''} 
                     onChange={(e: any) => updateConfig({ siteImages: { ...siteConfig.siteImages, aboutPortrait: e.target.value }})} 
                     onError={setAlertMessage}
@@ -461,27 +474,30 @@ export const Dashboard = () => {
                     <p className="sketch-font text-2xl">{isRTL ? 'لا توجد مشاريع مضافة' : 'Portfolio is empty...'}</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {projects.map((project) => (
-                      <div key={project.id} className="flex items-center justify-between p-5 sketchy-border bg-ink/5 hover:bg-ink/10 transition-all group">
-                        <div className="flex items-center gap-5">
-                          {project.image && <img src={project.image} alt="" className="w-16 h-12 object-cover opacity-80 sketchy-border" />}
-                          <div>
-                            <h4 className="font-bold sketch-font text-lg">{typeof project.title === 'object' ? (project.title as any)[lang] : project.title}</h4>
-                            <p className="text-[9px] uppercase font-black opacity-60 mt-1">{typeof project.category === 'object' ? (project.category as any)[lang] : project.category}</p>
+                    <div className="space-y-3">
+                      {projects.map((project) => (
+                        <div key={project.id} className="flex items-center justify-between p-5 sketchy-border bg-ink/5 hover:bg-ink/10 transition-all group">
+                          <div className="flex items-center gap-5">
+                            {project.image && <img src={project.image} alt="" className="w-16 h-12 object-cover opacity-80 sketchy-border" />}
+                            <div>
+                              <h4 className="font-bold sketch-font text-lg">{typeof project.title === 'object' ? (project.title as any)[lang] : project.title}</h4>
+                              <p className="text-[9px] uppercase font-black opacity-60 mt-1">{typeof project.category === 'object' ? (project.category as any)[lang] : project.category}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => duplicateProject(project)} title={isRTL ? 'تكرار المشروع' : 'Duplicate Project'} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
+                              <Copy size={14} />
+                            </button>
+                            <button onClick={() => { setCurrentProject(project); setIsEditingProject(true); }} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => deleteProject(project.id)} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
+                              <Trash2 size={14} />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => { setCurrentProject(project); setIsEditingProject(true); }} className="p-2 sketchy-border hover:bg-sepia/10 transition-colors">
-                            <Pencil size={14} />
-                          </button>
-                          <button onClick={() => deleteProject(project.id)} className="p-2 sketchy-border hover:bg-rust/10 text-rust transition-colors">
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
                 )}
               </SketchyCard>
               {hasUnpublishedChanges && (
@@ -785,26 +801,117 @@ export const Dashboard = () => {
                 </div>
                 
                 <div className="p-4 md:p-8 space-y-12 max-h-[85vh] overflow-y-auto scrollbar-thin bg-paper">
-                  <div className="grid grid-cols-1 gap-10">
-                    <LocalizedInput label={isRTL ? 'اسم المشروع' : "Project Title"} value={currentProject.title} onChange={(val: any) => setCurrentProject({...currentProject, title: val})} />
-                    <LocalizedTextarea label={isRTL ? 'وصف مختصر' : "Short Pitch"} value={currentProject.description} onChange={(val: any) => setCurrentProject({...currentProject, description: val})} />
-                    <LocalizedInput label={isRTL ? 'التصنيف' : "Category"} value={currentProject.category} onChange={(val: any) => setCurrentProject({...currentProject, category: val})} />
+
+                  {/* ── Section 1: HERO ── */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-6">① {isRTL ? 'الهيرو' : 'Hero'}</p>
+                    <div className="space-y-8">
+                      <div className="flex justify-between items-center bg-sepia/5 p-4 sketchy-border mb-4">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest">{isRTL ? 'مشروع مميز (يظهر في الرئيسية)' : 'Featured Project'}</p>
+                          <p className="text-[9px] opacity-60 font-bold uppercase">{isRTL ? 'تفعيل هذا الخيار سيظهر المشروع في الصفحة الرئيسية' : 'Show this project in the selected works section on Home page'}</p>
+                        </div>
+                        <button 
+                          onClick={() => setCurrentProject({...currentProject, featured: !currentProject.featured})}
+                          className={`px-4 py-2 sketchy-border font-black text-[10px] uppercase transition-all ${currentProject.featured ? 'bg-sepia text-white border-sepia' : 'opacity-40 hover:opacity-100'}`}
+                        >
+                          {currentProject.featured ? (isRTL ? 'مميز ✓' : 'Featured ✓') : (isRTL ? 'عادي' : 'Normal')}
+                        </button>
+                      </div>
+                      <LocalizedInput label={isRTL ? 'عنوان المشروع (كلمتين-تلاتة)' : "Project Title (2-3 words)"} value={currentProject.title} onChange={(val: any) => setCurrentProject({...currentProject, title: val})} />
+                      <LocalizedInput label={isRTL ? '"الخبطة" — جملة الفائدة الأساسية' : 'Subtitle — The Hook'} value={(currentProject as any).subtitle || {en:'', ar:'', it:''}} onChange={(val: any) => setCurrentProject({...currentProject, subtitle: val} as any)} />
+                      <LocalizedInput label={isRTL ? 'التصنيف' : "Category"} value={currentProject.category} onChange={(val: any) => setCurrentProject({...currentProject, category: val})} />
+                    </div>
                   </div>
 
-                  <SketchyCard title={isRTL ? 'الأصول المرئية' : "Visual Payload"} subtitle={isRTL ? 'الصور الأساسية' : "Main showcase assets"} className="bg-ink/5 border-none shadow-none translate-x-0 translate-y-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <ImageInput label={isRTL ? 'الغلاف الأساسي' : "Primary Cover"} value={currentProject.image || ''} onChange={(e: any) => setCurrentProject({...currentProject, image: e.target.value})} onError={setAlertMessage} />
-                       <div className="space-y-4">
-                          <ImageInput placeholder={isRTL ? 'تفاصيل 1' : "Detail 1"} value={currentProject.detailImages?.[0] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [e.target.value, currentProject.detailImages?.[1] || '', currentProject.detailImages?.[2] || '']})} onError={setAlertMessage} />
-                          <ImageInput placeholder={isRTL ? 'تفاصيل 2' : "Detail 2"} value={currentProject.detailImages?.[1] || ''} onChange={(e: any) => setCurrentProject({...currentProject, detailImages: [currentProject.detailImages?.[0] || '', e.target.value, currentProject.detailImages?.[2] || '']})} onError={setAlertMessage} />
-                       </div>
-                    </div>
+                  {/* Hero Image */}
+                  <SketchyCard title={isRTL ? 'صورة الهيرو (تملا الشاشة)' : "Hero Image (Full Screen)"} subtitle={isRTL ? 'هي البطل — اختار صورة قوية' : "This is the star — pick a strong visual"} className="bg-ink/5 border-none shadow-none translate-x-0 translate-y-0">
+                    <ImageInput label={isRTL ? 'صورة الغلاف الرئيسية' : "Main Cover Image"} hint="1920 × 1080 px — 16:9" value={currentProject.image || ''} onChange={(e: any) => setCurrentProject({...currentProject, image: e.target.value})} onError={setAlertMessage} />
                   </SketchyCard>
 
-                  <div className="grid grid-cols-3 gap-6">
-                    <LocalizedInput label={isRTL ? 'العميل' : "Client"} value={currentProject.client} onChange={(val: any) => setCurrentProject({...currentProject, client: val})} />
-                    <LocalizedInput label={isRTL ? 'الدور' : "Role"} value={currentProject.role} onChange={(val: any) => setCurrentProject({...currentProject, role: val})} />
-                    <LocalizedInput label={isRTL ? 'الفترة' : "Period"} value={currentProject.duration} onChange={(val: any) => setCurrentProject({...currentProject, duration: val})} />
+                  {/* ── Section 2: CONTEXT ── */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-6">② {isRTL ? 'السياق (The Why)' : 'Context (The Why)'}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-2">
+                        <p className="text-[10px] uppercase tracking-widest font-black opacity-50 mb-3">{isRTL ? 'التحدي — The Challenge' : 'The Challenge'}</p>
+                        <LocalizedTextarea label={isRTL ? 'ما هي المشكلة؟ (سطرين بالكتير)' : "What was the problem? (2 lines max)"} value={currentProject.challenge || {en:'', ar:'', it:''}} onChange={(val: any) => setCurrentProject({...currentProject, challenge: val})} />
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-[10px] uppercase tracking-widest font-black opacity-50 mb-3">{isRTL ? 'الطريقة — The Approach' : 'The Approach'}</p>
+                        <LocalizedTextarea label={isRTL ? 'إزاي حليتها؟ (سطرين بالكتير)' : "How did you solve it? (2 lines max)"} value={currentProject.solution || {en:'', ar:'', it:''}} onChange={(val: any) => setCurrentProject({...currentProject, solution: val})} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Section 3: GALLERY ── */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-6">③ {isRTL ? 'المعرض المرئي (The Show)' : 'Visual Gallery (The Show)'}</p>
+                    <SketchyCard
+                      title={isRTL ? 'صور الغاليري' : "Gallery Images"}
+                      subtitle={isRTL ? 'كل صورة ممكن يكون ليها كابشن اختياري' : "Each image can have an optional caption"}
+                      className="bg-ink/5 border-none shadow-none translate-x-0 translate-y-0"
+                      headerAction={
+                        <button
+                          onClick={() => {
+                            const gallery = (currentProject as any).gallery || [];
+                            setCurrentProject({...currentProject, gallery: [...gallery, { url: '', caption: { en: '', ar: '', it: '' } }]} as any);
+                          }}
+                          className="flex items-center gap-2 text-[10px] uppercase font-black px-3 py-1.5 sketchy-border hover:bg-sepia/10"
+                        >
+                          <Plus size={12} /> {isRTL ? 'أضف صورة' : 'Add Image'}
+                        </button>
+                      }
+                    >
+                      <div className="space-y-8">
+                        {((currentProject as any).gallery || []).length === 0 && (
+                          <p className="text-center opacity-30 sketch-font py-6">{isRTL ? 'لا توجد صور — اضغط أضف صورة' : 'No images yet — click Add Image'}</p>
+                        )}
+                        {((currentProject as any).gallery || []).map((item: any, idx: number) => {
+                          const galleryUpdate = (patch: any) => {
+                            const g = [...((currentProject as any).gallery || [])];
+                            g[idx] = { ...g[idx], ...patch };
+                            setCurrentProject({...currentProject, gallery: g} as any);
+                          };
+                          const galleryRemove = () => {
+                            const g = ((currentProject as any).gallery || []).filter((_: any, i: number) => i !== idx);
+                            setCurrentProject({...currentProject, gallery: g} as any);
+                          };
+                          return (
+                            <div key={idx} className="p-5 sketchy-border bg-ink/5 space-y-5">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[10px] font-black uppercase opacity-50">#{idx + 1} — {isRTL ? 'صورة' : 'Image'}</span>
+                                <button onClick={galleryRemove} className="p-2 sketchy-border hover:bg-rust/10 text-rust"><Trash2 size={14} /></button>
+                              </div>
+                              <ImageInput label={isRTL ? 'رابط الصورة أو ارفعها' : "Image URL or Upload"} hint="1600 × 1000 px — 16:10" value={item.url || ''} onChange={(e: any) => galleryUpdate({ url: e.target.value })} onError={setAlertMessage} />
+                              <LocalizedInput label={isRTL ? 'الكابشن (اختياري)' : "Caption (optional)"} value={item.caption || {en:'', ar:'', it:''}} onChange={(val: any) => galleryUpdate({ caption: val })} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </SketchyCard>
+                  </div>
+
+                  {/* ── Section 4: IMPACT ── */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-6">④ {isRTL ? 'الأثر (The Result)' : 'Impact (The Result)'}</p>
+                    <div className="space-y-8">
+                      <LocalizedInput label={isRTL ? 'النتيجة الكبيرة (مثلاً: 10X Faster)' : "Key Result (e.g. 10X Faster)"} value={(currentProject as any).keyResult || {en:'', ar:'', it:''}} onChange={(val: any) => setCurrentProject({...currentProject, keyResult: val} as any)} />
+                      <LocalizedTextarea label={isRTL ? 'الجملة الختامية (سطر واحد)' : "Closing Statement (one line)"} value={(currentProject as any).conclusion || {en:'', ar:'', it:''}} onChange={(val: any) => setCurrentProject({...currentProject, conclusion: val} as any)} />
+                    </div>
+                  </div>
+
+                  {/* ── Meta ── */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.3em] font-black opacity-40 mb-6">{isRTL ? 'ميتا داتا' : 'Meta'}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <LocalizedInput label={isRTL ? 'العميل' : "Client"} value={currentProject.client} onChange={(val: any) => setCurrentProject({...currentProject, client: val})} />
+                      <LocalizedInput label={isRTL ? 'الدور' : "Role"} value={currentProject.role} onChange={(val: any) => setCurrentProject({...currentProject, role: val})} />
+                      <LocalizedInput label={isRTL ? 'الفترة' : "Period"} value={currentProject.duration} onChange={(val: any) => setCurrentProject({...currentProject, duration: val})} />
+                    </div>
+                    <div className="mt-6">
+                      <SketchyInput label={isRTL ? 'رابط المشروع (اختياري)' : "Live Link (optional)"} value={currentProject.link || ''} onChange={(e) => setCurrentProject({...currentProject, link: e.target.value})} />
+                    </div>
                   </div>
 
                   <div className="pt-8 border-t border-white/5 flex justify-end gap-4">

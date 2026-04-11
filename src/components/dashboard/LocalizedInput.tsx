@@ -64,13 +64,14 @@ export const LocalizedTextarea: React.FC<LocalizedProps> = ({ label, value, onCh
 
 interface ImageInputProps {
   label?: string;
+  hint?: string;   /* e.g. "1920 × 1080 px — 16:9" */
   value: string;
   onChange: (e: any) => void;
   onError?: (msg: string) => void;
   placeholder?: string;
 }
 
-export const ImageInput: React.FC<ImageInputProps> = ({ label, value, onChange, onError, placeholder }) => {
+export const ImageInput: React.FC<ImageInputProps> = ({ label, hint, value, onChange, onError, placeholder }) => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -109,7 +110,16 @@ export const ImageInput: React.FC<ImageInputProps> = ({ label, value, onChange, 
 
   return (
     <div className="space-y-1 w-full">
-      {label && <label className="text-[10px] uppercase tracking-widest text-secondary font-black ml-1 opacity-80">{label}</label>}
+      {(label || hint) && (
+        <div className="flex items-baseline justify-between gap-2 ml-1 mb-1">
+          {label && <label className="text-[10px] uppercase tracking-widest text-secondary font-black opacity-80">{label}</label>}
+          {hint && (
+            <span className="text-[9px] font-black uppercase tracking-wider opacity-40 bg-ink/5 px-2 py-0.5 rounded-sm whitespace-nowrap border border-ink/10">
+              📐 {hint}
+            </span>
+          )}
+        </div>
+      )}
       <div className="flex gap-2 items-center">
         <div className="relative flex-1">
           <SketchyInput 

@@ -15,13 +15,20 @@ export interface DynamicSection {
   order: number;
 }
 
+export interface GalleryImage {
+  url: string;
+  caption?: LocalizedField;
+}
+
 export interface Project {
   id: string;
   title: LocalizedField;
+  subtitle?: LocalizedField;
   description: LocalizedField;
   tags: LocalizedField[];
   image: string;
   detailImages?: string[];
+  gallery?: GalleryImage[];
   category: LocalizedField;
   featured?: boolean;
   link?: string;
@@ -35,6 +42,8 @@ export interface Project {
   solution?: LocalizedField;
   architecture?: LocalizedField;
   strategy?: LocalizedField;
+  keyResult?: LocalizedField;
+  conclusion?: LocalizedField;
   dynamicSections?: DynamicSection[];
 }
 
