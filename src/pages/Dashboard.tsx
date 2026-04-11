@@ -401,6 +401,7 @@ export const Dashboard = () => {
                     <LocalizedInput label={t.label_site_name} value={siteConfig.name} onChange={(val: any) => updateConfig({ name: val })} />
                     <LocalizedInput label={t.label_site_role} value={siteConfig.role} onChange={(val: any) => updateConfig({ role: val })} />
                     <LocalizedTextarea label={t.label_site_summary} value={siteConfig.summary} onChange={(val: any) => updateConfig({ summary: val })} />
+                    <LocalizedTextarea label={isRTL ? "وصف صفحة 'من أنا' (مفصل)" : "Detailed About Summary"} value={(siteConfig as any).detailed_summary || {en:'', ar:'', it:''}} onChange={(val: any) => updateConfig({ detailed_summary: val })} />
                     <LocalizedInput label={(t as any).label_hero_giant} value={(siteConfig as any).heroGiantText || {en:'', ar:'', it:''}} onChange={(val: any) => updateConfig({ heroGiantText: val })} />
                     <div className="grid grid-cols-2 gap-4">
                        <LocalizedInput label={(t as any).label_btn1} value={(siteConfig as any).button1Text || {en:'', ar:'', it:''}} onChange={(val: any) => updateConfig({ button1Text: val })} />
